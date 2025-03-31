@@ -1,0 +1,66 @@
+#map {
+    height: 100vh;
+    width: 100%;
+}
+
+.map-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+.route-info {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: white;
+    border-radius: 8px;
+    padding: 10px;
+    min-width: 280px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.transport-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+}
+
+.control-panel {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    z-index: 1000;
+    width: 220px;
+}
+
+.leaflet-marker-icon.arqueo-icon {
+    background-image: url('https://cdn-icons-png.flaticon.com/512/1483/1483336.png');
+    background-size: contain;
+    width: 32px !important;
+    height: 32px !important;
+    border: none;
+    background-repeat: no-repeat;
+}
+
+.leaflet-marker-icon.cafe-icon {
+    background-image: url('https://cdn-icons-png.flaticon.com/512/1046/1046784.png');
+    background-size: contain;
+    width: 32px !important;
+    height: 32px !important;
+    border: none;
+    background-repeat: no-repeat;
+}
+
+.leaflet-marker-icon.resto-icon {
+    background-image: url('https://cdn-icons-png.flaticon.com/512/3075/3075977.png');
+    background-size: contain;
+    width: 32px !important;
+    height: 32px !important;
+    border: none;
+    background-repeat: no-repeat;
+}
