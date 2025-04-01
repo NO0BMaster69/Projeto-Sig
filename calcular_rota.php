@@ -1,20 +1,12 @@
 <?php
-header('Content-Type: application/json');
 require_once 'conexao.php';
+header('Content-Type: application/json');
 
-// Verificar se foram enviados os dados
-$input = json_decode(file_get_contents('php://input'), true);
-if (!isset($input['origem']) || !isset($input['destino'])) {
-    echo json_encode(['erro' => 'Coordenadas não fornecidas.']);
-    exit;
-}
+$data = json_decode(file_get_contents('php://input'), true);
+$origem = $data['origem'];
+$destino = $data['destino'];
+$modo = isset($data['modo']) ? $data['modo'] : 'car';
 
-$lat1 = $input['origem']['lat'];
-$lon1 = $input['origem']['lng'];
-$lat2 = $input['destino']['lat'];
-$lon2 = $input['destino']['lng'];
-
-// Encontrar os nós mais próximos (realista)
 function encontrar_vertice_realista($lat, $lon, $conn) {
     $sql = "
         SELECT id, source, target, x1, y1, x2, y2,
@@ -39,7 +31,6 @@ function encontrar_vertice_realista($lat, $lon, $conn) {
     return null;
 }
 
-// Distância Haversine para comparação
 function haversine($lat1, $lon1, $lat2, $lon2) {
     $R = 6371e3;
     $phi1 = deg2rad($lat1);
@@ -47,12 +38,16 @@ function haversine($lat1, $lon1, $lat2, $lon2) {
     $delta_phi = deg2rad($lat2 - $lat1);
     $delta_lambda = deg2rad($lon2 - $lon1);
 
-    $a = sin($delta_phi / 2) ** 2 +
-        cos($phi1) * cos($phi2) * sin($delta_lambda / 2) ** 2;
+    $a = sin($delta_phi / 2) * sin($delta_phi / 2) +
+        cos($phi1) * cos($phi2) *
+        sin($delta_lambda / 2) * sin($delta_lambda / 2);
     $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
     return $R * $c;
 }
+
+$lat1 = $origem['lat']; $lon1 = $origem['lng'];
+$lat2 = $destino['lat']; $lon2 = $destino['lng'];
 
 $source = encontrar_vertice_realista($lat1, $lon1, $conn);
 $target = encontrar_vertice_realista($lat2, $lon2, $conn);
@@ -62,34 +57,49 @@ if (!$source || !$target) {
     exit;
 }
 
-// Calcular rota com pgr_dijkstra
 $sql = "
-    SELECT ST_AsGeoJSON(geom_way) AS geojson
+    SELECT pt.geom_way, pt.km, pt.kmh
     FROM pgr_dijkstra(
         'SELECT id, source, target, cost, reverse_cost FROM pt_2po_4pgr',
-        CAST(:source AS integer),
-        CAST(:target AS integer),
-        false
+        $source, $target, false
     ) AS rotas
     JOIN pt_2po_4pgr pt ON rotas.edge = pt.id
     ORDER BY seq;
 ";
-$stmt = $conn->prepare($sql);
-$stmt->execute([
-    ':source' => $source,
-    ':target' => $target
-]);
 
+$stmt = $conn->query($sql);
 $features = [];
+$total_km = 0;
+$tempo_seg = 0;
+
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $geojson = $conn->query("SELECT ST_AsGeoJSON('" . $row['geom_way'] . "')")->fetchColumn();
     $features[] = [
-        'type' => 'Feature',
-        'geometry' => json_decode($row['geojson']),
-        'properties' => new stdClass()
+        "type" => "Feature",
+        "geometry" => json_decode($geojson),
+        "properties" => new stdClass()
     ];
+
+    $total_km += $row['km'];
+    $kmh = max($row['kmh'], 5);
+    $tempo_seg += ($row['km'] / $kmh) * 3600;
 }
 
 echo json_encode([
-    'type' => 'FeatureCollection',
-    'features' => $features
+    "type" => "FeatureCollection",
+    "features" => $features,
+    "distancia" => $total_km * 1000,
+    "tempo" => $tempo_seg
 ]);
+
+
+//Algoritmo alternativo por distância física
+//SELECT ST_AsGeoJSON(geom_way) AS geojson
+//FROM pgr_dijkstra(
+//    'SELECT id, source, target, km AS cost, km AS reverse_cost FROM pt_2po_4pgr',
+//    CAST(:source AS integer),
+//    CAST(:target AS integer),
+//    false
+//)
+//JOIN pt_2po_4pgr pt ON rotas.edge = pt.id
+//ORDER BY seq;

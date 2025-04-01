@@ -3,27 +3,21 @@ let pontos = [];
 let camadaRota = null;
 let marcadoresRota = [];
 
-// Ativar/Desativar modo rota
 function iniciarRota() {
     modoRotaAtivo = !modoRotaAtivo;
     pontos = [];
 
-    // Remover rota existente
     if (camadaRota) {
         map.removeLayer(camadaRota);
         camadaRota = null;
     }
 
-    // Remover marcadores anteriores
     marcadoresRota.forEach(m => map.removeLayer(m));
     marcadoresRota = [];
 
     document.getElementById('routeInfo').classList.add('d-none');
-
-    alert(modoRotaAtivo ? "Modo de rota ativo. Clique em dois pontos no mapa." : "Modo de rota desativado.");
 }
 
-// Evento de clique no mapa (apenas se modoRotaAtivo = true)
 map.on('click', function (e) {
     if (!modoRotaAtivo) return;
 
@@ -42,7 +36,6 @@ map.on('click', function (e) {
     }
 });
 
-// Enviar pontos para o PHP
 function calcularRota(origem, destino) {
     fetch('calcular_rota.php', {
         method: 'POST',
@@ -63,9 +56,12 @@ function calcularRota(origem, destino) {
 
             map.fitBounds(camadaRota.getBounds());
 
-            // Exibir caixa de informação
             document.getElementById('routeInfo').classList.remove('d-none');
-            document.getElementById('routeDetails').innerText = `Distância aproximada: ${(geojson.features.length * 0.3).toFixed(1)} km`;
+
+            const distanciaKm = (geojson.distancia / 1000).toFixed(2);
+            const tempoMin = (geojson.tempo / 60).toFixed(1);
+
+            document.getElementById('routeDetails').innerText = `Distância: ${distanciaKm} km | Tempo: ${tempoMin} min`;
         })
         .catch(err => {
             console.error("Erro ao calcular rota:", err);
@@ -73,7 +69,6 @@ function calcularRota(origem, destino) {
         });
 }
 
-// Fechar info rota
 function fecharRota() {
     if (camadaRota) map.removeLayer(camadaRota);
     camadaRota = null;
