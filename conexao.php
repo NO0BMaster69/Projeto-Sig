@@ -14,7 +14,7 @@ $password = 'dusCrias@4';
 try {
     $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $user, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo "Ligação à base de dados estabelecida com sucesso.";
+    // echo "Ligação à base de dados estabelecida com sucesso.";
 } catch (PDOException $e) {
     echo "Erro na ligação à base de dados: " . $e->getMessage();
 }

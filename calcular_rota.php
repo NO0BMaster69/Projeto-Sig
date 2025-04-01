@@ -1,61 +1,21 @@
 <?php
-// Ligação à base de dados
+header('Content-Type: application/json');
 require_once 'conexao.php';
-header('Content-Type: text/plain');
 
-// Coordenadas hardcoded
-$lat1 = 40.642517; $lon1 = -7.9620079;
-$lat2 = 41.1675639; $lon2 = -8.6437992;
-
-// Função original corrigida (com sintaxe correta)
-function encontrarVertice($conn, $lat, $lon) {
-    $sql = "
-        SELECT id
-        FROM pt_2po_4pgr
-        ORDER BY geom_way <-> ST_SetSRID(ST_Point(:lon, :lat), 4326)
-        LIMIT 1
-    ";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute([':lat' => $lat, ':lon' => $lon]);
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $row ? $row['id'] : null;
-}
-
-//Se quiseres realismo, substitui pelas próximas duas funções:
-$source = encontrar_vertice($lat1, $lon1, $conn);
-$target = encontrar_vertice($lat2, $lon2, $conn);
-
-if (!$source || !$target) {
-    echo "Não foi possível encontrar os nós.\n";
+// Verificar se foram enviados os dados
+$input = json_decode(file_get_contents('php://input'), true);
+if (!isset($input['origem']) || !isset($input['destino'])) {
+    echo json_encode(['erro' => 'Coordenadas não fornecidas.']);
     exit;
 }
 
-// 2. Executar pgr_dijkstra
-$sql = "
-SELECT pt.id, ST_AsText(pt.geom_way) AS geom_text
-FROM pgr_dijkstra(
-    'SELECT id, source, target, cost, reverse_cost FROM pt_2po_4pgr',
-    CAST(:source AS integer),
-    CAST(:target AS integer),
-    false
-) AS rotas
-JOIN pt_2po_4pgr pt ON rotas.edge = pt.id
-ORDER BY seq;
-";
+$lat1 = $input['origem']['lat'];
+$lon1 = $input['origem']['lng'];
+$lat2 = $input['destino']['lat'];
+$lon2 = $input['destino']['lng'];
 
-$stmt = $conn->prepare($sql);
-$stmt->execute([
-    ':source' => $source,
-    ':target' => $target
-]);
-
-echo "Rota de $source → $target:\n\n";
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    echo "Segmento ID {$row['id']} → {$row['geom_text']}\n";
-}
-
-// Função realista
-function encontrar_vertice($lat, $lon, $conn) {
+// Encontrar os nós mais próximos (realista)
+function encontrar_vertice_realista($lat, $lon, $conn) {
     $sql = "
         SELECT id, source, target, x1, y1, x2, y2,
                LEAST(
@@ -79,8 +39,9 @@ function encontrar_vertice($lat, $lon, $conn) {
     return null;
 }
 
+// Distância Haversine para comparação
 function haversine($lat1, $lon1, $lat2, $lon2) {
-    $R = 6371e3; // Raio da Terra em metros
+    $R = 6371e3;
     $phi1 = deg2rad($lat1);
     $phi2 = deg2rad($lat2);
     $delta_phi = deg2rad($lat2 - $lat1);
@@ -92,4 +53,43 @@ function haversine($lat1, $lon1, $lat2, $lon2) {
 
     return $R * $c;
 }
-?>
+
+$source = encontrar_vertice_realista($lat1, $lon1, $conn);
+$target = encontrar_vertice_realista($lat2, $lon2, $conn);
+
+if (!$source || !$target) {
+    echo json_encode(['erro' => 'Não foi possível encontrar os nós.']);
+    exit;
+}
+
+// Calcular rota com pgr_dijkstra
+$sql = "
+    SELECT ST_AsGeoJSON(geom_way) AS geojson
+    FROM pgr_dijkstra(
+        'SELECT id, source, target, cost, reverse_cost FROM pt_2po_4pgr',
+        CAST(:source AS integer),
+        CAST(:target AS integer),
+        false
+    ) AS rotas
+    JOIN pt_2po_4pgr pt ON rotas.edge = pt.id
+    ORDER BY seq;
+";
+$stmt = $conn->prepare($sql);
+$stmt->execute([
+    ':source' => $source,
+    ':target' => $target
+]);
+
+$features = [];
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $features[] = [
+        'type' => 'Feature',
+        'geometry' => json_decode($row['geojson']),
+        'properties' => new stdClass()
+    ];
+}
+
+echo json_encode([
+    'type' => 'FeatureCollection',
+    'features' => $features
+]);
