@@ -3,6 +3,9 @@ let pontosSelecionados = [];
 let modoTransporte = 'car';
 let rotaLayer = null;
 
+let popupCoordenadas = L.popup();
+
+
 function iniciarRota() {
     pontosSelecionados = [];
     document.getElementById('routeInfo').classList.add('d-none');
@@ -14,12 +17,22 @@ function iniciarRota() {
 }
 
 function onMapClick(e) {
+    // Mostrar popup com coordenadas
+    const { lat, lng } = e.latlng;
+    popupCoordenadas
+        .setLatLng(e.latlng)
+        .setContent(`Coordenadas:<br>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}`)
+        .openOn(map);
+
+    // Guardar ponto selecionado
     pontosSelecionados.push(e.latlng);
+
     if (pontosSelecionados.length === 2) {
         map.off('click', onMapClick);
         calcularRota();
     }
 }
+
 
 function setTransportMode(mode) {
     modoTransporte = mode;
