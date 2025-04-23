@@ -1,3 +1,4 @@
+
 // Dados simulados
 /*
 const locaisArqueo = [
@@ -111,6 +112,20 @@ function toggleLayer(tipo) {
   }
 }
 
+map.on('click', function (e) {
+  const {lat, lng} = e.latlng;
+
+  LocaisArqueo.forEach((local) => {
+    if (local.coords[0] === lat && local.coords[1] === lng) {
+      document.getElementsByClassName("map-popup").classList.add("active");
+      document.getElementsByClassName("location-name").innerHTML = local.nome;
+      document.getElementsByClassName("website-label").innerHTML = `<a href="${local.website}" target="_blank">Visitar</a>`;
+      document.getElementsByI("valor_lat").innerHTML = `${lat.toFixed(5)}`;
+      document.getElementsByI("valor_lng").innerHTML = `${lng.toFixed(5)}`;
+
+    }
+  });
+});
 //toggleLayer('arqueo'); // Mostrar arqueo por defeito
 // Carregar os dados ao iniciar
 carregarDados();
