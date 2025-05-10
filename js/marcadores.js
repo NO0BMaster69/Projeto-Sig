@@ -19,8 +19,11 @@ const grupoArqueo = L.layerGroup();
 const grupoCafe = L.layerGroup();
 const grupoResto = L.layerGroup();
 
-// Variável para guardar marcadores temporários dos locais próximos
 let marcadoresProximos = [];
+let currentRestorationCircle = null;
+let currentRestorationMarkers = [];
+let ultimoPontoSelecionado = null;
+let LocaisArqueo = [];
 
 async function carregarDados() {
   try {
@@ -36,7 +39,7 @@ async function carregarDados() {
     const dadosCafe = await responseCafe.json();
     const dadosRest = await responseRest.json();
 
-    const locaisArqueo = dadosLocal.map(local => ({
+    LocaisArqueo = dadosLocal.map(local => ({
       nome: local.nome,
       coords: [local.latitude, local.longitude],
       website: local.website,
@@ -54,7 +57,7 @@ async function carregarDados() {
       website: rest.website,
     }));
 
-    criarMarcadores(locaisArqueo, grupoArqueo, "arqueo");
+    criarMarcadores(LocaisArqueo, grupoArqueo, "arqueo");
     criarMarcadores(listaCafes, grupoCafe, "cafe");
     criarMarcadores(listaRestaurantes, grupoResto, "resto");
 
@@ -62,30 +65,6 @@ async function carregarDados() {
   } catch (error) {
     console.error("Erro ao carregar os dados:", error);
   }
-}
-
-function criarMarcadores(lista, grupo, classeIcone) {
-  grupo.clearLayers();
-  lista.forEach(local => {
-    const marker = L.marker(local.coords, {
-      icon: L.divIcon({ className: `${classeIcone}-icon` }),
-      title: local.nome,
-    });
-
-    if (classeIcone === "arqueo") {
-      const popup = `
-        <strong>${local.nome}</strong><br/>
-        <button onclick="mostrarProximos([${local.coords}], 5)">Mostrar 5km</button>
-        <button onclick="mostrarProximos([${local.coords}], 10)">10km</button>
-        <button onclick="mostrarProximos([${local.coords}], 25)">25km</button>
-      `;
-      marker.bindPopup(popup);
-    } else {
-      marker.bindPopup(`<strong>${local.nome}</strong>`);
-    }
-
-    grupo.addLayer(marker);
-  });
 }
 
 function toggleLayer(tipo) {
@@ -102,43 +81,125 @@ function toggleLayer(tipo) {
   }
 }
 
-map.on('click', function (e) {
-  const {lat, lng} = e.latlng;
+function criarMarcadores(lista, grupo, classeIcone) {
+  grupo.clearLayers();
+  lista.forEach(local => {
+    const marker = L.marker(local.coords, {
+      icon: L.divIcon({ className: `${classeIcone}-icon` }),
+      title: local.nome,
+    });
 
-  LocaisArqueo.forEach((local) => {
-    if (local.coords[0] === lat && local.coords[1] === lng) {
-      document.getElementsByClassName("map-popup").classList.add("active");
-      document.getElementsByClassName("location-name").innerHTML = local.nome;
-      document.getElementsByClassName("website-label").innerHTML = `<a href="${local.website}" target="_blank">Visitar</a>`;
-      document.getElementsByI("valor_lat").innerHTML = `${lat.toFixed(5)}`;
-      document.getElementsByI("valor_lng").innerHTML = `${lng.toFixed(5)}`;
+    if (classeIcone === "arqueo") {
+      const popup = `
+        <strong>${local.nome}</strong><br/>
+        <button class="btn-restauracao" data-lat="${local.coords[0]}" data-lng="${local.coords[1]}" data-raio="5">Restauração 5km</button>
+        <button class="btn-restauracao" data-lat="${local.coords[0]}" data-lng="${local.coords[1]}" data-raio="10">Restauração 10km</button>
+        <button class="btn-restauracao" data-lat="${local.coords[0]}" data-lng="${local.coords[1]}" data-raio="25">Restauração 25km</button>
+      `;
+      marker.bindPopup(popup);
 
+      marker.on('popupopen', function (e) {
+        const popupEl = e.popup.getElement();
+        popupEl.querySelectorAll('.btn-restauracao').forEach(btn => {
+          btn.addEventListener('click', function (evt) {
+            evt.stopPropagation(); // Evita fechar o popup
+            const lat = parseFloat(this.dataset.lat);
+            const lng = parseFloat(this.dataset.lng);
+            const raio = parseFloat(this.dataset.raio);
+            mostrarLocaisRestauracao(L.latLng(lat, lng), raio);
+          });
+        });
+      });
+    } else {
+      marker.bindPopup(`<strong>${local.nome}</strong>`);
     }
-  });
-});
-function mostrarProximos(pontoArqueo, raioKm) {
-  // Se já existem marcadores, remove-os e cancela a ação
-  if (marcadoresProximos.length > 0) {
-    marcadoresProximos.forEach(m => map.removeLayer(m));
-    marcadoresProximos = [];
-    return;
-  }
 
-  const raioMetros = raioKm * 1000;
-  const todosLocais = [...grupoCafe.getLayers(), ...grupoResto.getLayers()];
-
-  todosLocais.forEach(marcadorOriginal => {
-    const latlng = marcadorOriginal.getLatLng();
-    const distancia = map.distance(pontoArqueo, latlng);
-
-    if (distancia <= raioMetros) {
-      const marcadorClone = L.marker(latlng, { icon: marcadorOriginal.options.icon })
-          .bindPopup(marcadorOriginal.getPopup().getContent());
-      marcadorClone.addTo(map);
-      marcadoresProximos.push(marcadorClone);
-    }
+    grupo.addLayer(marker);
   });
 }
 
-// Iniciar carregamento de dados ao abrir a página
+function calcularZoomAdequado(raioKm) {
+  if (raioKm <= 0.2) return 17;
+  if (raioKm <= 0.5) return 16;
+  if (raioKm <= 1) return 15;
+  if (raioKm <= 2) return 14;
+  if (raioKm <= 5) return 13;
+  if (raioKm <= 10) return 12;
+  if (raioKm <= 20) return 11;
+  return 10;
+}
+
+function limparMarcadoresRestauracao() {
+  currentRestorationMarkers.forEach(m => map.removeLayer(m));
+  currentRestorationMarkers = [];
+
+  if (currentRestorationCircle) {
+    map.removeLayer(currentRestorationCircle);
+    currentRestorationCircle = null;
+  }
+
+  ultimoPontoSelecionado = null;
+}
+
+function mostrarLocaisRestauracao(pontoArqueo, raioKm) {
+  const mesmaLocalizacao = ultimoPontoSelecionado &&
+      pontoArqueo.lat === ultimoPontoSelecionado.lat &&
+      pontoArqueo.lng === ultimoPontoSelecionado.lng;
+
+  if (mesmaLocalizacao) {
+    limparMarcadoresRestauracao();
+    return;
+  }
+
+  limparMarcadoresRestauracao();
+  ultimoPontoSelecionado = pontoArqueo;
+
+  map.createPane('restorationCirclePane');
+  map.getPane('restorationCirclePane').style.zIndex = 650;
+
+  currentRestorationCircle = L.circle(pontoArqueo, {
+    radius: raioKm * 1000,
+    color: '#0066ff',
+    fillColor: '#0066ff',
+    fillOpacity: 0.3,
+    weight: 3,
+    pane: 'restorationCirclePane'
+  }).addTo(map);
+
+  const todosLocais = [...grupoCafe.getLayers(), ...grupoResto.getLayers()];
+  todosLocais.forEach(marker => {
+    const distancia = pontoArqueo.distanceTo(marker.getLatLng());
+    if (distancia <= raioKm * 1000) {
+      marker.addTo(map);
+      currentRestorationMarkers.push(marker);
+    }
+  });
+
+  map.setView(pontoArqueo, calcularZoomAdequado(raioKm));
+}
+
+// Fecha popup e limpa tudo ao clicar fora
+map.on('click', function (e) {
+  if (e.originalEvent.target.closest('.leaflet-popup')) return;
+
+  limparMarcadoresRestauracao();
+  map.closePopup();
+  ultimoPontoSelecionado = null;
+});
+
+document.head.insertAdjacentHTML('beforeend', `
+  <style>
+    .restoration-circle {
+      stroke-dasharray: 5, 5;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { fill-opacity: 0.2; }
+      50% { fill-opacity: 0.3; }
+      100% { fill-opacity: 0.2; }
+    }
+  </style>
+`);
+
+// Iniciar
 carregarDados();
