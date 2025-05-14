@@ -19,6 +19,7 @@ const grupoArqueo = L.layerGroup();
 const grupoCafe = L.layerGroup();
 const grupoResto = L.layerGroup();
 
+// Variável para guardar marcadores temporários dos locais próximos
 let marcadoresProximos = [];
 let currentRestorationCircle = null;
 let currentRestorationMarkers = [];
