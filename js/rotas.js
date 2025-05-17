@@ -62,8 +62,8 @@ function calcularRota(origem, destino) {
         .then(resp => resp.json()) // Converte a resposta para JSON
         .then(geojson => {
             // Verifica se a resposta contém uma rota válida
-            if (!geojson || !geojson.features || geojson.features.length === 0) {
-                alert("Rota não encontrada."); // Exibe um alerta se não houver rota
+            if (!geojson || !geojson.data || !geojson.data.features || geojson.data.features.length === 0) {
+                alert("Rota não encontrada.");
                 return;
             }
 

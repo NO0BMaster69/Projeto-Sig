@@ -1,5 +1,6 @@
 <?php
-require_once 'conexao.php'; // Inclui o arquivo de conexão com o banco de dados
+require_once 'conexao.php';
+$conn = getConnection();
 header('Content-Type: application/json'); // Define o cabeçalho como JSON
 
 try {
