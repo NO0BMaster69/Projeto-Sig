@@ -1,6 +1,6 @@
 <?php
 require_once 'conexao.php';
-global $conn;
+$conn = getConnection();
 
 // Mostrar todos os erros para debug
 ini_set('display_errors', 1);
@@ -47,14 +47,14 @@ try {
 
     // Consulta para calcular a rota usando pgr_dijkstra
     $queryRota = "
-        SELECT ST_AsGeoJSON(geom_way) as geojson, km, kmh
-        FROM pgr_dijkstra(
-            'SELECT id, source, target, cost, reverse_cost FROM pt_2po_4pgr',
-            :source, :target, false
-        ) AS route
-        JOIN pt_2po_4pgr pt ON route.edge = pt.id
-        ORDER BY seq;
-    ";
+    SELECT ST_AsGeoJSON(geom_way) as geojson, km
+    FROM pgr_dijkstra(
+        'SELECT id, source, target, cost, reverse_cost FROM pt_2po_4pgr',
+        :source, :target, false
+    ) AS route
+    JOIN pt_2po_4pgr pt ON route.edge = pt.id
+    ORDER BY seq;
+";
 
     $stmt = $conn->prepare($queryRota);
     $stmt->execute(['source' => $source, 'target' => $target]);
@@ -68,10 +68,9 @@ try {
         $geojsonFeatures[] = [
             'type' => 'Feature',
             'geometry' => json_decode($rota['geojson']),
-            'properties' => ['km' => $rota['km'], 'kmh' => $rota['kmh']]
+            'properties' => ['km' => $rota['km']]
         ];
-        $distanciaTotal += $rota['km'] * 1000;
-        $tempoTotal += ($rota['km'] / $rota['kmh']) * 3600;
+        $distanciaTotal += $rota['km'] * 1000;  // Conversão para metros
     }
 
     // Estrutura final em GeoJSON

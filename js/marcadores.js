@@ -32,13 +32,25 @@ async function carregarDados() {
     const responseCafe = await fetch("get_cafes.php");
     const responseRest = await fetch("get_restaurantes.php");
 
-    if (!responseLocal.ok || !responseCafe.ok || !responseRest.ok) {
-      throw new Error("Erro ao carregar dados");
-    }
+    const dadosLocal = await responseLocal.json().catch(() => {
+      console.error("Resposta inválida de get_locais.php:", responseLocal.statusText);
+      throw new Error("Erro ao carregar locais");
+    });
 
-    const dadosLocal = await responseLocal.json();
-    const dadosCafe = await responseCafe.json();
-    const dadosRest = await responseRest.json();
+    const dadosCafe = await responseCafe.json().catch(() => {
+      console.error("Resposta inválida de get_cafes.php:", responseCafe.statusText);
+      throw new Error("Erro ao carregar cafés");
+    });
+
+    const dadosRest = await responseRest.json().catch(() => {
+      console.error("Resposta inválida de get_restaurantes.php:", responseRest.statusText);
+      throw new Error("Erro ao carregar restaurantes");
+    });
+
+    // Verificação adicional se os dados foram retornados como arrays
+    if (!Array.isArray(dadosLocal) || !Array.isArray(dadosCafe) || !Array.isArray(dadosRest)) {
+      throw new Error("Formato de dados inválido.");
+    }
 
     LocaisArqueo = dadosLocal.map(local => ({
       nome: local.nome,
@@ -64,10 +76,9 @@ async function carregarDados() {
 
     toggleLayer("arqueo");
   } catch (error) {
-    console.error("Erro ao carregar os dados:", error);
+    console.error("Erro ao carregar os dados:", error.message);
   }
 }
-
 function toggleLayer(tipo) {
   switch (tipo) {
     case "arqueo":
