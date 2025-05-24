@@ -185,3 +185,127 @@
     font-family: 'Courier New', monospace;
     font-size: 0.9rem;
 }
+
+
+.map-searchbar {
+    position: absolute;
+    top: 15px !important;
+    left: 60px !important;
+    z-index: 910 !important;
+    display: flex;
+    gap: 8px;
+    background: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.10);
+    align-items: center;
+    min-width: 290px;
+}
+
+
+
+#btnManual {
+    border-radius: 50%;
+    background-color: #9b27b0;
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 12px rgba(13,110,253,0.17);
+    font-size: 1.4rem;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+    position: relative;
+}
+
+
+#btnManual:hover, #btnManual:focus {
+    background-color: #7c1fa8;
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(13,110,253,0.28);
+    transform: translateY(-2px) scale(1.06);
+    outline: none;
+}
+
+#btnManual .bi-question-circle-fill {
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+
+
+
+/* Tutorial overlay e screen */
+/* Tutorial overlay */
+#tutorial-step-overlay {
+    position: fixed;
+    z-index: 20000;
+    left: 0; top: 0; right: 0; bottom: 0;
+    pointer-events: none;
+}
+#tutorial-step-overlay .tutorial-screen {
+    position: fixed;
+    top: 0; left: 0; right:0; bottom:0;
+    background: rgba(0,0,0,0.13);
+    z-index: 1;
+    pointer-events: auto;
+    cursor: pointer;
+}
+.tutorial-step {
+    position: absolute;
+    z-index: 10;
+    min-width: 180px;
+    pointer-events: none;
+    display: flex;
+    align-items: center; /* Alinha verticalmente a seta e o balão */
+}
+
+.tutorial-step .tutorial-bubble {
+    background: #fff;
+    color: #333;
+    border-radius: 10px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+    padding: 15px 18px;
+    margin: 0 0 0 0;
+    font-size: 1rem;
+    font-weight: 500;
+    pointer-events: auto;
+    border: 2px solid #e70d2f;
+    max-width: 310px;
+    text-align: left;
+}
+.tutorial-arrow {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    z-index: 11;
+}
+.arrow-top {
+    position: absolute;
+    top: -26px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 26px;
+    height: 26px;
+    background: url('data:image/svg+xml;utf8,<svg width="26" height="26" xmlns="http://www.w3.org/2000/svg"><polygon points="13,0 26,26 0,26" fill="red"/></svg>') no-repeat center center;
+    background-size: contain;
+}
+
+.arrow-bottom {
+    left: 50%; transform: translateX(-50%);
+    bottom: -26px;
+    background: url('data:image/svg+xml;utf8,<svg width="26" height="26" xmlns="http://www.w3.org/2000/svg"><polygon points="0,0 26,0 13,26" fill="red"/></svg>');
+}
+.arrow-left {
+    position: absolute;
+    left: -26px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    background: url('data:image/svg+xml;utf8,<svg width="26" height="26" xmlns="http://www.w3.org/2000/svg"><polygon points="26,0 0,13 26,26" fill="red"/></svg>') no-repeat center center;
+    background-size: contain;
+}
+
+
+.arrow-right {
+    right: -26px; top: 50%; transform: translateY(-50%) rotate(90deg);
+    background: url('data:image/svg+xml;utf8,<svg width="26" height="26" xmlns="http://www.w3.org/2000/svg"><polygon points="26,13 0,0 0,26" fill="red"/></svg>');
+}
