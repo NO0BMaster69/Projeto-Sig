@@ -10,13 +10,22 @@ async function pesquisarEndereco(query) {
     return await resp.json();
 }
 
+
+
+
+
+
+
 // Centraliza o mapa e adiciona um marcador quando o usuário seleciona o resultado
 function irParaEndereco(lat, lon, descricao) {
-    mapa.panTo([lat, lon], {
+    const novoZoom = 16; // Defina o nível de zoom desejado
+
+    // Pan + Zoom animado e suave
+    mapa.flyTo([lat, lon], novoZoom, {
         animate: true,
-        duration: 1  // duração da animação em segundos (pode ajustar se quiser mais lenta ou rápida)
+        duration: 1.5 // duração da animação em segundos
     });
-    // Se quiser adicionar efeitos visuais (como highlight ou animação), pode fazer aqui
+
 }
 
 
@@ -29,11 +38,26 @@ function mostrarResultados(resultados) {
         container.className = 'search-results-list shadow';
         document.getElementById('searchBar').appendChild(container);
     }
-    container.innerHTML = '';
     if (!resultados.length) {
-        container.innerHTML = '<small class="text-muted px-2">Nenhum resultado encontrado.</small>';
+        container.style.display = 'none'; // Esconde se não houver resultados
+        container.innerHTML = '';
         return;
     }
+
+    // limpa os resultados anteriores quando o user clica fora
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.map-searchbar')) {
+            const el = document.getElementById('searchResults');
+            if (el) {
+                el.style.display = 'none'; // Esconde ao clicar fora
+                el.innerHTML = '';
+            }
+        }
+    });
+
+
+    container.style.display = 'block'; // Exibe se houver resultados
+    container.innerHTML = '';
     resultados.forEach(res => {
         const el = document.createElement('div');
         el.className = 'search-result-item px-2 py-1';
@@ -41,11 +65,13 @@ function mostrarResultados(resultados) {
         el.style.cursor = 'pointer';
         el.onclick = () => {
             irParaEndereco(res.lat, res.lon, res.display_name);
+            container.style.display = 'none'; // Esconde ao selecionar
             container.innerHTML = '';
         };
         container.appendChild(el);
     });
 }
+
 
 const searchInput = document.getElementById('search');
 const searchBtn = document.getElementById('searchBtn');
@@ -65,6 +91,31 @@ searchBtn.addEventListener('click', async function() {
 searchInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') searchBtn.click();
 });
+
+// Evento para mostrar sugestões enquanto digita
+searchInput.addEventListener('input', debounce(async function() {
+    const query = searchInput.value.trim();
+    if (query.length < 3) {
+        mostrarResultados([]); // Limpa se pouco texto
+        return;
+    }
+    try {
+        const results = await pesquisarEndereco(query);
+        mostrarResultados(results);
+    } catch (e) {
+        mostrarResultados([]); // Limpa em erro
+    }
+}, 350));
+
+
+// Função utilitária debounce para evitar chamadas excessivas
+function debounce(fn, delay) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn.apply(this, args), delay);
+    }
+}
 
 // Clean results when clicking outside
 document.addEventListener('click', e => {

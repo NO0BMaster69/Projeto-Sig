@@ -23,6 +23,15 @@ const cafes = [
 // Refatorado com carregamento/descarregamento + filtro por checkbox
 // ==============================
 
+function toggleLayer(tipo) {
+  // Após mudar o estado dos checkboxes, apenas recarregue os marcadores visíveis
+  if (typeof carregarMarcadoresVisiveis === 'function' && typeof mapa !== 'undefined') {
+    carregarMarcadoresVisiveis(mapa.getBounds());
+  }
+}
+
+
+
 const iconeArqueo = L.icon({
   iconUrl: 'https://cdn-icons-png.flaticon.com/512/1597/1597883.png',
   iconSize: [32, 32],

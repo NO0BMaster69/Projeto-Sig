@@ -61,38 +61,55 @@ function mostrarMenuRaio(marker) {
 
 // Aplicar o filtro de raio e desenhar círculo
 function aplicarFiltroRaioArqueo() {
-    const valor = document.getElementById("selectRaio").value;
-
-    // Remover área anterior se existir
-    if (circuloRaio) {
-        mapa.removeLayer(circuloRaio);
-        circuloRaio = null;
-    }
-
-    if (!valor) {
-        document.getElementById("menuRaioArqueo").classList.add("d-none");
-        filtrarMarcadoresPorRaio(null);
+    // Pegue o raio selecionado
+    const raio = parseFloat(document.getElementById('selectRaio').value);
+    if (!raio || !ultimoPontoSelecionado) {
+        // Remove marcadores filtrados, se houver
+        removerMarcadoresRestauracaoProximos();
         return;
     }
 
-    raioSelecionado = parseInt(valor);
-    circuloRaio = L.circle(pontoCentro, {
-        radius: raioSelecionado,
-        color: "#007BFF",
-        fillColor: "#007BFF",
+    // Remove marcadores de filtros anteriores
+    removerMarcadoresRestauracaoProximos();
+
+    // Crie o circulo de raio para referência visual
+    if (currentRestorationCircle) {
+        mapa.removeLayer(currentRestorationCircle);
+    }
+    currentRestorationCircle = L.circle([ultimoPontoSelecionado.lat, ultimoPontoSelecionado.lng], {
+        radius: raio,
+        color: 'blue',
         fillOpacity: 0.1
     }).addTo(mapa);
 
-    filtrarMarcadoresPorRaio(raioSelecionado);
-}
+    // Filtra todos os pontos do tipo cafe/resto no raio escolhido
+    const pontosFiltrados = todosPontosDisponiveis.filter(p =>
+        (p.tipo === "cafe" || p.tipo === "resto") &&
+        mapa.distance([p.lat, p.lng], [ultimoPontoSelecionado.lat, ultimoPontoSelecionado.lng]) <= raio
+    );
 
-// Filtrar cafés e restaurantes pelo raio
-function filtrarMarcadoresPorRaio(raio) {
-    if (!pontoCentro) return;
+    // Adicione e salve os marcadores do filtro atual
+    currentRestorationMarkers = [];
 
-    todosMarcadoresRestauração.forEach(({ marker }) => {
-        const dentro = raio ? pontoCentro.distanceTo(marker.getLatLng()) <= raio : true;
-        marker.setOpacity(dentro ? 1 : 0);
+    pontosFiltrados.forEach(p => {
+        let icone = p.tipo === "cafe" ? iconeCafe : iconeResto;
+        const marker = L.marker([p.lat, p.lng], {icon: icone})
+            .bindTooltip(p.nome)
+            .addTo(mapa);
+        currentRestorationMarkers.push(marker);
     });
 }
+
+// Função para remover marcadores filtrados do raio anterior
+function removerMarcadoresRestauracaoProximos() {
+    if (currentRestorationMarkers && currentRestorationMarkers.length) {
+        currentRestorationMarkers.forEach(m => mapa.removeLayer(m));
+        currentRestorationMarkers = [];
+    }
+    if(currentRestorationCircle) {
+        mapa.removeLayer(currentRestorationCircle);
+        currentRestorationCircle = null;
+    }
+}
+
 
