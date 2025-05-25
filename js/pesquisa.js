@@ -12,7 +12,7 @@ async function pesquisarEndereco(query) {
 
 // Centraliza o mapa e adiciona um marcador quando o usuário seleciona o resultado
 function irParaEndereco(lat, lon, descricao) {
-    map.panTo([lat, lon], {
+    mapa.panTo([lat, lon], {
         animate: true,
         duration: 1  // duração da animação em segundos (pode ajustar se quiser mais lenta ou rápida)
     });

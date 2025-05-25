@@ -23,6 +23,14 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
+.radius-selector {
+    position: absolute;
+    top: 80px;
+    right: 20px;
+    z-index: 1100;
+    min-width: 220px;
+}
+
 .transport-buttons {
     display: flex;
     justify-content: space-around;
@@ -48,7 +56,7 @@
 }
 
 .leaflet-marker-icon.cafe-icon {
-    background-image: url('https://cdn-icons-png.flaticon.com/512/1046/1046784.png');
+    background-image: url('https://cdn-icons-png.flaticon.com/512/924/924514.png');
     background-size: contain;
     width: 28px !important;
     height: 28px !important;
@@ -57,7 +65,7 @@
 }
 
 .leaflet-marker-icon.resto-icon {
-    background-image: url('https://cdn-icons-png.flaticon.com/512/3075/3075977.png');
+    background-image: url('https://cdn-icons-png.flaticon.com/512/281/281478.png');
     background-size: contain;
     width: 28px !important;
     height: 28px !important;

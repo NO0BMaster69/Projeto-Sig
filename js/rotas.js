@@ -27,7 +27,7 @@ function iniciarRota() {
 }
 
 // Evento de clique no mapa para selecionar pontos de origem e destino
-map.on('click', function (e) {
+mapa.on('click', function (e) {
     if (!modoRotaAtivo) return; // Ignora cliques se o modo de rota não estiver ativo
 
     const { lat, lng } = e.latlng; // Obtém as coordenadas do clique
