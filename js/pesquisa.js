@@ -10,12 +10,6 @@ async function pesquisarEndereco(query) {
     return await resp.json();
 }
 
-
-
-
-
-
-
 // Centraliza o mapa e adiciona um marcador quando o usuário seleciona o resultado
 function irParaEndereco(lat, lon, descricao) {
     const novoZoom = 16; // Defina o nível de zoom desejado

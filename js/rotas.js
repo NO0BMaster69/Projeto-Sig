@@ -1,110 +1,97 @@
-// Variáveis globais para controle do estado da rota
-let modoRotaAtivo = false; // Indica se o modo de seleção de rota está ativo
-let pontos = []; // Armazena os pontos selecionados no mapa (origem e destino)
-let camadaRota = null; // Camada que exibe a rota no mapa
-let marcadoresRota = []; // Lista de marcadores adicionados ao mapa
+let modoRotaAtivo = false;
+let pontos = [];
+let camadaRota = null;
+let marcadoresRota = [];
 
-/**
- * Função para iniciar ou reiniciar o modo de seleção de rota.
- * Limpa os pontos, marcadores e a camada de rota do mapa.
- */
-function iniciarRota() {
-    modoRotaAtivo = !modoRotaAtivo; // Alterna o estado do modo de rota
-    pontos = []; // Reinicia os pontos selecionados
-
-    // Remove a camada de rota do mapa, se existir
-    if (camadaRota) {
-        map.removeLayer(camadaRota);
-        camadaRota = null;
-    }
-
-    // Remove todos os marcadores do mapa
-    marcadoresRota.forEach(m => map.removeLayer(m));
-    marcadoresRota = [];
-
-    // Esconde as informações da rota na interface
-    document.getElementById('routeInfo').classList.add('d-none');
-}
-
-// Evento de clique no mapa para selecionar pontos de origem e destino
-mapa.on('click', function (e) {
-    if (!modoRotaAtivo) return; // Ignora cliques se o modo de rota não estiver ativo
-
-    const { lat, lng } = e.latlng; // Obtém as coordenadas do clique
-    const marcador = L.marker([lat, lng]) // Cria um marcador no mapa
-        .addTo(map)
-        .bindPopup(`Lat: ${lat.toFixed(5)}, Lon: ${lng.toFixed(5)}`) // Exibe as coordenadas no popup
-        .openPopup();
-
-    marcadoresRota.push(marcador); // Adiciona o marcador à lista
-    pontos.push({ lat, lng }); // Adiciona as coordenadas à lista de pontos
-
-    // Quando dois pontos forem selecionados, calcula a rota
-    if (pontos.length === 2) {
-        calcularRota(pontos[0], pontos[1]); // Chama a função para calcular a rota
-        modoRotaAtivo = false; // Desativa o modo de seleção de rota
-    }
-});
-
-/**
- * Função para calcular a rota entre dois pontos.
- * Envia uma requisição para o servidor e exibe a rota no mapa.
- *
- * @param {Object} origem Coordenadas do ponto de origem (lat, lng)
- * @param {Object} destino Coordenadas do ponto de destino (lat, lng)
- */
 function calcularRota(origem, destino) {
-    fetch('calcular_rota.php', { // Envia uma requisição POST para o servidor
+    const apiKey = '5b3ce3597851110001cf624856745b046b754835925a6b04b8fc7880';
+
+    const url = 'https://api.openrouteservice.org/v2/directions/driving-car/geojson';
+
+    const body = {
+        coordinates: [
+            [origem.lng, origem.lat],
+            [destino.lng, destino.lat]
+        ]
+    };
+
+    fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }, // Define o tipo de conteúdo como JSON
-        body: JSON.stringify({ origem, destino }) // Envia as coordenadas no corpo da requisição
+        headers: {
+            'Authorization': apiKey,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
     })
-        .then(resp => resp.json()) // Converte a resposta para JSON
-        .then(geojson => {
-            // Verifica se a resposta contém uma rota válida
-            if (!geojson || !geojson.data || !geojson.data.features || geojson.data.features.length === 0) {
+        .then(resp => resp.json())
+        .then(data => {
+            if (!data || !data.features || data.features.length === 0) {
                 alert("Rota não encontrada.");
                 return;
             }
 
-            // Remove a camada de rota anterior, se existir
-            if (camadaRota) map.removeLayer(camadaRota);
+            if (camadaRota) mapa.removeLayer(camadaRota);
 
-            // Adiciona a nova rota ao mapa como uma camada GeoJSON
-            camadaRota = L.geoJSON(geojson, {
-                style: { color: 'blue', weight: 4 } // Define o estilo da linha da rota
-            }).addTo(map);
+            camadaRota = L.geoJSON(data, {
+                style: { color: 'blue', weight: 4 }
+            }).addTo(mapa);
 
-            // Ajusta o zoom do mapa para a extensão da rota
-            map.fitBounds(camadaRota.getBounds());
+            mapa.fitBounds(camadaRota.getBounds());
 
-            // Exibe as informações da rota na interface
-            document.getElementById('routeInfo').classList.remove('d-none');
-
-            // Calcula e exibe a distância e o tempo estimado
-            const distanciaKm = (geojson.distancia / 1000).toFixed(2); // Distância em km
-            const tempoMin = (geojson.tempo / 60).toFixed(1); // Tempo em minutos
+            const props = data.features[0].properties.summary;
+            const distanciaKm = (props.distance / 1000).toFixed(2);
+            const tempoMin = (props.duration / 60).toFixed(1);
             document.getElementById('routeDetails').innerText = `Distância: ${distanciaKm} km | Tempo: ${tempoMin} min`;
+            document.getElementById('routeInfo').classList.remove('d-none');
         })
         .catch(err => {
-            // Trata erros na requisição ou no cálculo da rota
             console.error("Erro ao calcular rota:", err);
             alert("Erro ao calcular rota.");
         });
 }
 
-/**
- * Função para fechar a rota exibida no mapa.
- * Remove a camada de rota e os marcadores, e esconde as informações da rota.
- */
-function fecharRota() {
-    if (camadaRota) map.removeLayer(camadaRota); // Remove a camada de rota do mapa
-    camadaRota = null; // Reseta a variável da camada de rota
+function iniciarRota() {
+    modoRotaAtivo = true;
+    pontos = [];
 
-    // Remove todos os marcadores do mapa
-    marcadoresRota.forEach(m => map.removeLayer(m));
+    if (camadaRota) {
+        mapa.removeLayer(camadaRota);
+        camadaRota = null;
+    }
+
+    marcadoresRota.forEach(m => mapa.removeLayer(m));
     marcadoresRota = [];
 
-    // Esconde as informações da rota na interface
     document.getElementById('routeInfo').classList.add('d-none');
 }
+
+mapa.on('click', function (e) {
+    if (!modoRotaAtivo) return;
+
+    const { lat, lng } = e.latlng;
+    const marcador = L.marker([lat, lng])
+        .addTo(mapa)
+        .bindPopup(`Lat: ${lat.toFixed(5)}, Lon: ${lng.toFixed(5)}`)
+        .openPopup();
+
+    marcadoresRota.push(marcador);
+    pontos.push({ lat, lng });
+
+    if (pontos.length === 2) {
+        calcularRota(pontos[0], pontos[1]);
+        modoRotaAtivo = false;
+    }
+});
+
+function fecharRota() {
+    if (camadaRota) mapa.removeLayer(camadaRota);
+    camadaRota = null;
+
+    marcadoresRota.forEach(m => mapa.removeLayer(m));
+    marcadoresRota = [];
+
+    document.getElementById('routeInfo').classList.add('d-none');
+}
+
+window.iniciarRota = iniciarRota;
+window.fecharRota = fecharRota;

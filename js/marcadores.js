@@ -1,28 +1,3 @@
-
-// Dados simulados
-/*
-const locaisArqueo = [
-    { nome: "Castro do Zambujal", coords: [39.4, -9.15] },
-    { nome: "Ruínas Romanas", coords: [40.2, -8.4] }
-];
-
-
-
-
-const cafes = [
-    { nome: "Café Central", coords: [39.5, -8.1] },
-    { nome: "Pastelaria Doce", coords: [39.6, -8.2] }
-];*/
-// ==============================
-// marcadores.js
-// Refatorado com carregamento e descarregamento progressivo
-// ==============================
-
-// ==============================
-// marcadores.js
-// Refatorado com carregamento/descarregamento + filtro por checkbox
-// ==============================
-
 function toggleLayer(tipo) {
   // Após mudar o estado dos checkboxes, apenas recarregue os marcadores visíveis
   if (typeof carregarMarcadoresVisiveis === 'function' && typeof mapa !== 'undefined') {
@@ -129,7 +104,7 @@ function carregarMarcadoresVisiveis(bounds) {
             (tipo === "cafe" && cafeAtivo) ||
             (tipo === "resto" && restoAtivo));
 
-    // ⚠️ Se não deve mostrar, e está no mapa → remove
+    // Se não deve mostrar, e está no mapa → remove
     if (!deveMostrar && ponto._adicionado && ponto._marker) {
       mapa.removeLayer(ponto._marker);
       ponto._adicionado = false;

@@ -1,5 +1,3 @@
-// mapa.js (atualizado para suportar carregamento progressivo de pontos)
-
 // Inicialização do mapa centrado em Aveiro
 window.mapa = L.map('map', {
     center: [40.64, -8.65],
@@ -72,7 +70,7 @@ function aplicarFiltroRaioArqueo() {
     // Remove marcadores de filtros anteriores
     removerMarcadoresRestauracaoProximos();
 
-    // Crie o circulo de raio para referência visual
+    // Crie o círculo de raio para referência visual
     if (currentRestorationCircle) {
         mapa.removeLayer(currentRestorationCircle);
     }
