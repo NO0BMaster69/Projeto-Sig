@@ -1,3 +1,5 @@
+// mapa.js (atualizado para suportar carregamento progressivo de pontos)
+
 // Inicialização do mapa centrado em Aveiro
 window.mapa = L.map('map', {
     center: [40.64, -8.65],
@@ -53,61 +55,59 @@ let pontoCentro = null;
 // Mostrar o menu ao clicar num ponto arqueológico
 function mostrarMenuRaio(marker) {
     pontoCentro = marker.getLatLng();
-    document.getElementById("menuRaioArqueo").classList.remove("d-none");
+    const menu = document.getElementById("menuRaioArqueo");
+    menu.classList.add("active");
+    menu.classList.remove("d-none");
     document.getElementById("selectRaio").value = "";
 }
 
-// Aplicar o filtro de raio e desenhar círculo
 function aplicarFiltroRaioArqueo() {
-    // Pegue o raio selecionado
-    const raio = parseFloat(document.getElementById('selectRaio').value);
-    if (!raio || !ultimoPontoSelecionado) {
-        // Remove marcadores filtrados, se houver
-        removerMarcadoresRestauracaoProximos();
+    const menu = document.getElementById("menuRaioArqueo");
+    const valor = document.getElementById("selectRaio").value;
+
+    if (circuloRaio) {
+        mapa.removeLayer(circuloRaio);
+        circuloRaio = null;
+    }
+
+    if (!valor) {
+        menu.classList.remove("active");
+        setTimeout(() => menu.classList.add("d-none"), 300);
+        document.getElementById("menuRaioArqueo").classList.add("d-none");
+        filtrarMarcadoresPorRaio(null);
         return;
     }
 
-    // Remove marcadores de filtros anteriores
-    removerMarcadoresRestauracaoProximos();
-
-    // Crie o círculo de raio para referência visual
-    if (currentRestorationCircle) {
-        mapa.removeLayer(currentRestorationCircle);
-    }
-    currentRestorationCircle = L.circle([ultimoPontoSelecionado.lat, ultimoPontoSelecionado.lng], {
-        radius: raio,
-        color: 'blue',
+    raioSelecionado = parseInt(valor);
+    circuloRaio = L.circle(pontoCentro, {
+        radius: raioSelecionado,
+        color: "#007BFF",
+        fillColor: "#007BFF",
         fillOpacity: 0.1
     }).addTo(mapa);
 
-    // Filtra todos os pontos do tipo cafe/resto no raio escolhido
-    const pontosFiltrados = todosPontosDisponiveis.filter(p =>
-        (p.tipo === "cafe" || p.tipo === "resto") &&
-        mapa.distance([p.lat, p.lng], [ultimoPontoSelecionado.lat, ultimoPontoSelecionado.lng]) <= raio
-    );
-
-    // Adicione e salve os marcadores do filtro atual
-    currentRestorationMarkers = [];
-
-    pontosFiltrados.forEach(p => {
-        let icone = p.tipo === "cafe" ? iconeCafe : iconeResto;
-        const marker = L.marker([p.lat, p.lng], {icon: icone})
-            .bindTooltip(p.nome)
-            .addTo(mapa);
-        currentRestorationMarkers.push(marker);
-    });
+    filtrarMarcadoresPorRaio(raioSelecionado);
 }
 
 // Função para remover marcadores filtrados do raio anterior
-function removerMarcadoresRestauracaoProximos() {
-    if (currentRestorationMarkers && currentRestorationMarkers.length) {
-        currentRestorationMarkers.forEach(m => mapa.removeLayer(m));
-        currentRestorationMarkers = [];
-    }
-    if(currentRestorationCircle) {
-        mapa.removeLayer(currentRestorationCircle);
-        currentRestorationCircle = null;
-    }
-}
+function filtrarMarcadoresPorRaio(raio) {
+    const cafeAtivo = document.getElementById("chkCafe")?.checked;
+    const restoAtivo = document.getElementById("chkResto")?.checked;
 
+    todosMarcadoresRestauração.forEach(({ marker, tipo }) => {
+        const estaAtivo = (tipo === "cafe" && cafeAtivo) || (tipo === "resto" && restoAtivo);
+
+        if (!estaAtivo) {
+            marker.setOpacity(0);
+            return;
+        }
+
+        if (raio && pontoCentro) {
+            const dentro = pontoCentro.distanceTo(marker.getLatLng()) <= raio;
+            marker.setOpacity(dentro ? 1 : 0);
+        } else {
+            marker.setOpacity(1); // Sem raio → mostrar todos os ativos
+        }
+    });
+}
 

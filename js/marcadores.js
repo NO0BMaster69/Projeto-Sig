@@ -15,14 +15,14 @@ const iconeArqueo = L.icon({
 });
 
 const iconeCafe = L.icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png',
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/12257/12257378.png',
   iconSize: [28, 28],
   iconAnchor: [14, 28],
   popupAnchor: [0, -28]
 });
 
 const iconeResto = L.icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/2537/2537867.png',
   iconSize: [28, 28],
   iconAnchor: [14, 28],
   popupAnchor: [0, -28]
