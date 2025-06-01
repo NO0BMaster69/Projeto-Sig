@@ -5,8 +5,9 @@ let marcadoresRota = [];
 
 function calcularRota(origem, destino) {
     const apiKey = '5b3ce3597851110001cf624856745b046b754835925a6b04b8fc7880';
+    const modo = document.querySelector('input[name="transportMode"]:checked').value;
 
-    const url = 'https://api.openrouteservice.org/v2/directions/driving-car/geojson';
+    const url = `https://api.openrouteservice.org/v2/directions/${modo}/geojson`;
 
     const body = {
         coordinates: [
@@ -41,8 +42,9 @@ function calcularRota(origem, destino) {
             const props = data.features[0].properties.summary;
             const distanciaKm = (props.distance / 1000).toFixed(2);
             const tempoMin = (props.duration / 60).toFixed(1);
-            document.getElementById('routeDetails').innerText = `Distância: ${distanciaKm} km | Tempo: ${tempoMin} min`;
-            document.getElementById('routeInfo').classList.remove('d-none');
+            document.getElementById('travelTime').innerText = `${tempoMin} min`;
+            document.getElementById('travelDistance').innerText = `${distanciaKm} km`;
+            //document.getElementById('routeInfo').classList.remove('d-none');
         })
         .catch(err => {
             console.error("Erro ao calcular rota:", err);
@@ -92,6 +94,12 @@ function fecharRota() {
 
     document.getElementById('routeInfo').classList.add('d-none');
 }
+
+document.getElementById('modoTransporte').addEventListener('change', function () {
+    if (pontos.length === 2) {
+        calcularRota(pontos[0], pontos[1]);
+    }
+});
 
 window.iniciarRota = iniciarRota;
 window.fecharRota = fecharRota;
