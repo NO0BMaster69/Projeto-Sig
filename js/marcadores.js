@@ -98,13 +98,23 @@ function carregarMarcadoresVisiveis(bounds) {
     const tipo = ponto.tipo;
     const latlng = L.latLng(ponto.lat, ponto.lng);
 
-    const deveMostrar =
-        bounds.contains(latlng) &&
-        ((tipo === "arqueo" && arqueoAtivo) ||
-            (tipo === "cafe" && cafeAtivo) ||
-            (tipo === "resto" && restoAtivo));
+    const estaAtivo =
+        (tipo === "arqueo" && arqueoAtivo) ||
+        (tipo === "cafe" && cafeAtivo) ||
+        (tipo === "resto" && restoAtivo);
 
-    // Se não deve mostrar, e está no mapa → remove
+    const dentroDoMapa = bounds.contains(latlng);
+
+    // Aplicar raio só a café/restaurante
+    const dentroDoRaio = (
+        tipo === "arqueo" || raioSelecionado === null || pontoCentro === null
+            ? true
+            : pontoCentro.distanceTo(latlng) <= raioSelecionado
+    );
+
+    const deveMostrar = estaAtivo && dentroDoMapa && dentroDoRaio;
+
+    // ❌ Remover se não deve mostrar
     if (!deveMostrar && ponto._adicionado && ponto._marker) {
       mapa.removeLayer(ponto._marker);
       ponto._adicionado = false;
@@ -112,13 +122,13 @@ function carregarMarcadoresVisiveis(bounds) {
       return;
     }
 
-    // ✅ Se deve mostrar, mas ainda não está no mapa → adiciona
+    // ✅ Adicionar se deve mostrar e ainda não foi adicionado
     if (deveMostrar && !ponto._adicionado) {
       let icone;
       switch (tipo) {
+        case "cafe": icone = iconeCafe; break;
+        case "resto": icone = iconeResto; break;
         case "arqueo": icone = iconeArqueo; break;
-        case "cafe":   icone = iconeCafe;   break;
-        case "resto":  icone = iconeResto;  break;
       }
 
       const marker = L.marker(latlng, { icon: icone }).bindTooltip(ponto.nome);

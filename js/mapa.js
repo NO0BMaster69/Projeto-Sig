@@ -62,22 +62,40 @@ function mostrarMenuRaio(marker) {
 }
 
 function aplicarFiltroRaioArqueo() {
-    const menu = document.getElementById("menuRaioArqueo");
     const valor = document.getElementById("selectRaio").value;
 
+    // Remover círculo anterior
     if (circuloRaio) {
         mapa.removeLayer(circuloRaio);
         circuloRaio = null;
     }
 
     if (!valor) {
-        menu.classList.remove("active");
-        setTimeout(() => menu.classList.add("d-none"), 300);
+        // Ocultar menu de raio
         document.getElementById("menuRaioArqueo").classList.add("d-none");
-        filtrarMarcadoresPorRaio(null);
+
+        // ❗ Resetar raio e centro
+        raioSelecionado = null;
+        pontoCentro = null;
+
+        // ❗ Remover cafés e restaurantes previamente filtrados
+        todosPontosDisponiveis.forEach(ponto => {
+            if ((ponto.tipo === "cafe" || ponto.tipo === "resto") && ponto._marker) {
+                mapa.removeLayer(ponto._marker);
+                ponto._marker = null;
+                ponto._adicionado = false;
+            }
+        });
+
+        // Recarrega dinamicamente todos os visíveis com base no mapa e checkboxes
+        if (typeof carregarMarcadoresVisiveis === "function") {
+            carregarMarcadoresVisiveis(mapa.getBounds());
+        }
+
         return;
     }
 
+    // Definir novo raio e centro
     raioSelecionado = parseInt(valor);
     circuloRaio = L.circle(pontoCentro, {
         radius: raioSelecionado,
@@ -86,6 +104,7 @@ function aplicarFiltroRaioArqueo() {
         fillOpacity: 0.1
     }).addTo(mapa);
 
+    // Aplicar filtro de raio
     filtrarMarcadoresPorRaio(raioSelecionado);
 }
 
