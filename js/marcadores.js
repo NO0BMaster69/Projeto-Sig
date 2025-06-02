@@ -114,7 +114,7 @@ function carregarMarcadoresVisiveis(bounds) {
 
     const deveMostrar = estaAtivo && dentroDoMapa && dentroDoRaio;
 
-    // ❌ Remover se não deve mostrar
+    //  Remover se não deve mostrar
     if (!deveMostrar && ponto._adicionado && ponto._marker) {
       mapa.removeLayer(ponto._marker);
       ponto._adicionado = false;
@@ -122,7 +122,7 @@ function carregarMarcadoresVisiveis(bounds) {
       return;
     }
 
-    // ✅ Adicionar se deve mostrar e ainda não foi adicionado
+    //  Adicionar se deve mostrar e ainda não foi adicionado
     if (deveMostrar && !ponto._adicionado) {
       let icone;
       switch (tipo) {

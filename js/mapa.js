@@ -130,3 +130,4 @@ function filtrarMarcadoresPorRaio(raio) {
     });
 }
 
+mapa.zoomControl.setPosition('bottomright');

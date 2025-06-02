@@ -1,14 +1,17 @@
+const ORS_API_KEY = '5b3ce3597851110001cf624856745b046b754835925a6b04b8fc7880';
+
 let modoRotaAtivo = false;
 let pontos = [];
 let camadaRota = null;
 let marcadoresRota = [];
 
+/**
+ * Calcula a rota entre dois pontos usando a OpenRouteService API.
+ */
 function calcularRota(origem, destino) {
-    const apiKey = '5b3ce3597851110001cf624856745b046b754835925a6b04b8fc7880';
-    const modo = document.querySelector('input[name="transportMode"]:checked').value;
+    const modo = document.querySelector('input[name="transportMode"]:checked')?.value || 'driving-car';
 
     const url = `https://api.openrouteservice.org/v2/directions/${modo}/geojson`;
-
     const body = {
         coordinates: [
             [origem.lng, origem.lat],
@@ -19,18 +22,19 @@ function calcularRota(origem, destino) {
     fetch(url, {
         method: 'POST',
         headers: {
-            'Authorization': apiKey,
+            'Authorization': ORS_API_KEY,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
     })
         .then(resp => resp.json())
         .then(data => {
-            if (!data || !data.features || data.features.length === 0) {
+            if (!data?.features?.length) {
                 alert("Rota não encontrada.");
                 return;
             }
 
+            // Limpa rota anterior
             if (camadaRota) mapa.removeLayer(camadaRota);
 
             camadaRota = L.geoJSON(data, {
@@ -44,7 +48,9 @@ function calcularRota(origem, destino) {
             const tempoMin = (props.duration / 60).toFixed(1);
             document.getElementById('travelTime').innerText = `${tempoMin} min`;
             document.getElementById('travelDistance').innerText = `${distanciaKm} km`;
-            //document.getElementById('routeInfo').classList.remove('d-none');
+
+            // Mostrar botão de fechar rota
+            document.getElementById('btnFecharRota')?.classList.remove('d-none');
         })
         .catch(err => {
             console.error("Erro ao calcular rota:", err);
@@ -52,6 +58,9 @@ function calcularRota(origem, destino) {
         });
 }
 
+/**
+ * Ativa o modo de criação de rota e limpa estados anteriores.
+ */
 function iniciarRota() {
     modoRotaAtivo = true;
     pontos = [];
@@ -64,18 +73,31 @@ function iniciarRota() {
     marcadoresRota.forEach(m => mapa.removeLayer(m));
     marcadoresRota = [];
 
-    document.getElementById('routeInfo').classList.add('d-none');
+    document.getElementById('btnFecharRota')?.classList.add('d-none');
 }
 
+/**
+ * Fecha/limpa a rota ativa do mapa.
+ */
+function fecharRota() {
+    if (camadaRota) mapa.removeLayer(camadaRota);
+    camadaRota = null;
+
+    marcadoresRota.forEach(m => mapa.removeLayer(m));
+    marcadoresRota = [];
+    pontos = [];
+
+    document.getElementById('travelTime').innerText = '--';
+    document.getElementById('travelDistance').innerText = '--';
+    document.getElementById('btnFecharRota')?.classList.add('d-none');
+}
+
+// Captação dos cliques no mapa para definir origem/destino
 mapa.on('click', function (e) {
     if (!modoRotaAtivo) return;
 
     const { lat, lng } = e.latlng;
-    const marcador = L.marker([lat, lng])
-        .addTo(mapa)
-        .bindPopup(`Lat: ${lat.toFixed(5)}, Lon: ${lng.toFixed(5)}`)
-        .openPopup();
-
+    const marcador = L.marker([lat, lng]).addTo(mapa);
     marcadoresRota.push(marcador);
     pontos.push({ lat, lng });
 
@@ -85,21 +107,13 @@ mapa.on('click', function (e) {
     }
 });
 
-function fecharRota() {
-    if (camadaRota) mapa.removeLayer(camadaRota);
-    camadaRota = null;
-
-    marcadoresRota.forEach(m => mapa.removeLayer(m));
-    marcadoresRota = [];
-
-    document.getElementById('routeInfo').classList.add('d-none');
-}
-
+// Atualiza a rota ao mudar o modo de transporte
 document.getElementById('modoTransporte').addEventListener('change', function () {
     if (pontos.length === 2) {
         calcularRota(pontos[0], pontos[1]);
     }
 });
 
+// Expõe funções globalmente
 window.iniciarRota = iniciarRota;
 window.fecharRota = fecharRota;

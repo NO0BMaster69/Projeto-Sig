@@ -23,16 +23,6 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
-.radius-selector {
-    position: absolute;
-    top: 80px;
-    right: 20px;
-    z-index: 1100;
-    min-width: 220px;
-}
-
-
-
 .leaflet-marker-icon.arqueo-icon {
     background-image: url('https://cdn-icons-png.flaticon.com/512/1597/1597883.png');
     background-size: contain;
