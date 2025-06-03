@@ -1,80 +1,55 @@
-#tutorial-step-overlay {
-    position: fixed;
-    z-index: 20000;
-    left: 0; top: 0; right: 0; bottom: 0;
-    pointer-events: none;
+/* Personalização do Intro.js para parecer UI moderna */
+.introjs-tooltip {
+    border-radius: 12px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+    background-color: #fff !important;
+    border: 1px solid #dee2e6 !important;
+    font-family: "Segoe UI", Roboto, sans-serif !important;
+    padding: 1.25rem 1.5rem !important;
+    max-width: 360px !important;
+    transition: all 0.3s ease-in-out;
 }
 
-#tutorial-step-overlay .tutorial-screen {
-    position: fixed;
-    top: 0; left: 0; right:0; bottom:0;
-    background: rgba(0, 0, 0, 0.45);
-    z-index: 1;
-    pointer-events: auto;
-    cursor: pointer;
+.introjs-tooltip-title {
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    color: #0d6efd !important;
+    margin-bottom: 0.5rem !important;
 }
 
-.tutorial-step {
-    position: absolute;
-    z-index: 10;
-    min-width: 180px;
-    pointer-events: none;
-    display: flex;
-    align-items: center;
+.introjs-tooltiptext {
+    font-size: 0.925rem !important;
+    color: #495057 !important;
+    line-height: 1.5 !important;
 }
 
-.tutorial-step, .tutorial-step * {
-    pointer-events: none !important;
-    user-select: none !important;
-}
-
-.tutorial-step .tutorial-bubble {
-    background: #fff;
-    color: #333;
-    border-radius: 10px;
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
-    padding: 15px 18px;
-    font-size: 1rem;
+.introjs-button {
+    border-radius: 30px !important;
+    padding: 6px 18px !important;
+    font-size: 0.875rem !important;
     font-weight: 500;
-    border: 2px solid #e70d2f;
-    max-width: 310px;
-    text-align: left;
 }
 
-.tutorial-arrow {
-    position: absolute;
-    width: 26px;
-    height: 26px;
-    z-index: 11;
+.introjs-prevbutton,
+.introjs-nextbutton {
+    background-color: #0d6efd !important;
+    color: #fff !important;
+    border: none !important;
 }
 
-.arrow-top {
-    top: -26px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: url('data:image/svg+xml;utf8,<svg width="26" height="26" xmlns="http://www.w3.org/2000/svg"><polygon points="13,0 26,26 0,26" fill="red"/></svg>') no-repeat center center;
-    background-size: contain;
+.introjs-donebutton {
+    background-color: #198754 !important;
+    color: #fff !important;
+    border: none !important;
 }
 
-.arrow-bottom {
-    bottom: -26px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: url('data:image/svg+xml;utf8,<svg width="26" height="26" xmlns="http://www.w3.org/2000/svg"><polygon points="0,0 26,0 13,26" fill="red"/></svg>');
+.introjs-skipbutton {
+    background-color: transparent !important;
+    color: #6c757d !important;
+    border: none !important;
 }
 
-.arrow-left {
-    left: -26px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: url('data:image/svg+xml;utf8,<svg width="26" height="26" xmlns="http://www.w3.org/2000/svg"><polygon points="26,0 0,13 26,26" fill="red"/></svg>') no-repeat center center;
-    background-size: contain;
+.introjs-tooltipbuttons {
+    text-align: right !important;
+    margin-top: 12px;
 }
-
-.arrow-right {
-    right: -26px;
-    top: 50%;
-    transform: translateY(-50%) rotate(90deg);
-    background: url('data:image/svg+xml;utf8,<svg width="26" height="26" xmlns="http://www.w3.org/2000/svg"><polygon points="26,13 0,0 0,26" fill="red"/></svg>');
-}
-

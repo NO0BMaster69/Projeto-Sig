@@ -74,11 +74,11 @@ function aplicarFiltroRaioArqueo() {
         // Ocultar menu de raio
         document.getElementById("menuRaioArqueo").classList.add("d-none");
 
-        // ❗ Resetar raio e centro
+        // Resetar raio e centro
         raioSelecionado = null;
         pontoCentro = null;
 
-        // ❗ Remover cafés e restaurantes previamente filtrados
+        // Remover cafés e restaurantes previamente filtrados
         todosPontosDisponiveis.forEach(ponto => {
             if ((ponto.tipo === "cafe" || ponto.tipo === "resto") && ponto._marker) {
                 mapa.removeLayer(ponto._marker);
