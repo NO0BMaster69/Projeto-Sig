@@ -1,5 +1,6 @@
 /* Personalização do Intro.js para parecer UI moderna */
 .introjs-tooltip {
+    position: relative !important; /* <-- Essencial para posicionar elementos internos com absolute */
     border-radius: 12px !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
     background-color: #fff !important;
@@ -12,30 +13,32 @@
 
 .introjs-tooltip-title {
     font-weight: 600 !important;
-    font-size: 1rem !important;
+    font-size: 1.2rem !important;
     color: #0d6efd !important;
     margin-bottom: 0.5rem !important;
+
+}
+
+.introjs-tooltip-header {
+    padding: 0 10px !important;
+
 }
 
 .introjs-tooltiptext {
     font-size: 0.925rem !important;
     color: #495057 !important;
     line-height: 1.5 !important;
+    padding: 10px 10px 0 10px !important; /* padding vertical */
 }
 
 .introjs-button {
-    border-radius: 30px !important;
     padding: 6px 18px !important;
     font-size: 0.875rem !important;
     font-weight: 500;
+    border: none !important;
+    background-color: transparent !important;;
 }
 
-.introjs-prevbutton,
-.introjs-nextbutton {
-    background-color: #0d6efd !important;
-    color: #fff !important;
-    border: none !important;
-}
 
 .introjs-donebutton {
     background-color: #198754 !important;
@@ -43,13 +46,45 @@
     border: none !important;
 }
 
-.introjs-skipbutton {
-    background-color: transparent !important;
-    color: #6c757d !important;
-    border: none !important;
+.introjs-tooltipbuttons {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px 0 16px;
+    margin-top: 12px;
+    border-top: 1px solid #dee2e6;
+    gap: 60%;
 }
 
-.introjs-tooltipbuttons {
-    text-align: right !important;
-    margin-top: 12px;
+.introjs-prevbutton {
+    font-size: 14px;
+    padding: 8px 0 !important;
+    color: #495057;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.2s ease;
+    text-decoration: none;
 }
+
+.introjs-prevbutton:focus, .introjs-prevbutton:hover, .introjs-prevbutton:active {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.map-dropdown::after {
+    content: '';
+    display: inline-block;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+    transition: transform 0.3s ease;
+}
+
+.map-dropdown.show::after {
+    transform: rotate(180deg); /* Inverte a seta para cima */
+}
+

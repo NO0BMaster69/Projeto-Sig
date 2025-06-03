@@ -37,14 +37,28 @@
          data-title="Pesquisar Endereço">
         <input type="text" id="search" class="form-control ps-5 pe-5 rounded-pill shadow-sm"
                placeholder="Pesquisar endereço..."/>
-        <i id="searchBtn" class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"></i>
-        <i id="clearSearch" class="bi bi-x-lg position-absolute top-50 end-0 translate-middle-y me-3 text-muted" style="cursor:pointer; display: none;"></i>
+        <i id="searchBtn"
+           class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"></i>
+        <i id="clearSearch" class="bi bi-x-lg position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
+           style="cursor:pointer; display: none;"></i>
     </div>
 
-    <!-- Criar Rota -->
-    <div class="d-flex gap-2">
+    <!-- Criar Rota e Controle de Mapa -->
+    <div class="d-flex gap-2 align-items-center">
+        <!-- Mudar Base de Mapa -->
+        <div class="btn-group dropup"  data-intro="Aqui podes mudar a base de mapa ou aceder à ajuda." data-title="Controlo do Mapa" >
+            <button type="button" class="btn btn-primary dropdown-toggle map-dropdown" data-bs-toggle="dropdown">
+                <i class="bi bi-map"></i> Mapa
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="mudarBase('osm')">OpenStreetMap</a></li>
+                <li><a class="dropdown-item" href="#" onclick="mudarBase('topo')">Topo</a></li>
+                <li><a class="dropdown-item" href="#" onclick="mudarBase('satellite')">Satélite</a></li>
+            </ul>
+        </div>
+        <!-- Criar Rota -->
         <button id="btnCriarRota"
-                class="btn btn-primary w-100 d-flex align-items-center justify-content-center py-2 gap-2"
+                class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
                 onclick="iniciarRota()"
                 data-intro="Clique aqui para iniciar uma rota. Depois selecione dois pontos no mapa."
                 data-title="Criar Rota">
@@ -150,18 +164,8 @@
     </div>
 </div>
 
-<!-- Controlo do mapa -->
-<div class="map-controls" data-intro="Aqui podes mudar a base de mapa ou aceder à ajuda." data-title="Controlo do Mapa">
-    <div class="btn-group dropup">
-        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
-            <i class="bi bi-map"></i> Mapa
-        </button>
-        <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#" onclick="mudarBase('osm')">OpenStreetMap</a></li>
-            <li><a class="dropdown-item" href="#" onclick="mudarBase('topo')">Topo</a></li>
-            <li><a class="dropdown-item" href="#" onclick="mudarBase('satellite')">Satélite</a></li>
-        </ul>
-    </div>
+<!-- ajuda -->
+<div class="map-controls">
     <button class="btn btn-outline-secondary ms-2" id="btnManual" type="button" title="Ajuda">
         <i class="bi bi-question-circle-fill"></i>
     </button>
@@ -178,22 +182,71 @@
 <script src="js/pesquisa.js"></script>
 
 <script>
-    const menuRaio = document.getElementById('menuRaioArqueo')
+    const menuRaio = document.getElementById('menuRaioArqueo');
+
+    const dropdownButton = document.querySelector('.map-dropdown');
+
+    dropdownButton.addEventListener('shown.bs.dropdown', () => {
+        dropdownButton.classList.add('show');
+    });
+
+    dropdownButton.addEventListener('hidden.bs.dropdown', () => {
+        dropdownButton.classList.remove('show');
+    });
+
 
     document.getElementById('btnManual').addEventListener('click', function () {
         menuRaio.classList.remove('d-none');
 
-        introJs().setOptions({
-            nextLabel: 'Seguinte',
-            prevLabel: 'Anterior',
-            skipLabel: 'Saltar',
-            doneLabel: 'Concluir',
-            showBullets: false
-        }).oncomplete(function () {
+        const intro = introJs();
+
+        intro.setOptions({
+            showButtons: true, // deixa os botões visíveis para podermos manipulá-los
+            showBullets: false,
+            showStepNumbers: false,
+            exitOnOverlayClick: false,
+            nextLabel: '', // removido
+            prevLabel: 'Voltar',
+            showSkipButton: false,
+            skipLabel: ''
+        });
+
+        // Avança com clique fora do tooltip
+        function avancarAoClicarFora(e) {
+            const isTooltip = e.target.closest('.introjs-tooltip');
+            if (!isTooltip) {
+                intro.nextStep();
+            }
+        }
+
+        document.addEventListener('click', avancarAoClicarFora);
+
+        intro.onexit(function () {
             menuRaio.classList.add('d-none');
-        }).onexit(function () {
+            document.removeEventListener('click', avancarAoClicarFora);
+        });
+
+        intro.oncomplete(function () {
             menuRaio.classList.add('d-none');
-        }).start();
+            document.removeEventListener('click', avancarAoClicarFora);
+        });
+
+        // Após cada passo, reposiciona e substitui botões
+        intro.onafterchange(function () {
+            // Remove "Anterior" e "Seguinte"
+            const nextBtn = document.querySelector('.introjs-nextbutton');
+            if (nextBtn) nextBtn.remove();
+
+            const buttonsContainer = document.querySelector('.introjs-tooltipbuttons');
+            if (skipBtn && buttonsContainer && !buttonsContainer.contains(skipBtn)) {
+                buttonsContainer.appendChild(skipBtn);
+            }
+
+
+
+        });
+
+        intro.start();
     });
 </script>
 
