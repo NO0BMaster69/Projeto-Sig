@@ -28,6 +28,27 @@ const iconeResto = L.icon({
   popupAnchor: [0, -28]
 });
 
+const iconeGas = L.icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/890/890964.png',
+  iconSize: [28, 28],
+  iconAnchor: [14, 28],
+  popupAnchor: [0, -28]
+});
+
+const iconeComboio = L.icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/724/724080.png',
+  iconSize: [28, 28],
+  iconAnchor: [14, 28],
+  popupAnchor: [0, -28]
+});
+
+const iconeAutocarro = L.icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/1042/1042263.png',
+  iconSize: [28, 28],
+  iconAnchor: [14, 28],
+  popupAnchor: [0, -28]
+});
+
 let todosPontosDisponiveis = [];
 const todosMarcadoresRestauração = [];
 let marcadoresProximos = [];
@@ -41,23 +62,21 @@ async function carregarDados() {
     const responseLocal = await fetch("get_locais.php");
     const responseCafe = await fetch("get_cafes.php");
     const responseRest = await fetch("get_restaurantes.php");
-    const responseGas = await fetch("get_bombasGasolina.php");
-    const responseComb = await fetch("get_estacoesComboio.php");
-    const responseAuto = await fetch("get_terminaisAutocarro.php");
+    const responseResta = await fetch("get_restauracao.php");
+    const responseServicos = await fetch("get_servicos.php");
 
     const dadosLocal = await responseLocal.json();
     const dadosCafe = await responseCafe.json();
     const dadosRest = await responseRest.json();
-    const dadosGas = await responseGas.json();
-    const dadosComb = await responseComb.json();
-    const dadosAuto = await responseAuto.json();
+    const servicos = await responseServicos.json();
+    const restauracao =  await responseResta.json();
+
 
     console.log("Locais:", dadosLocal.length);
     console.log("Cafés:", dadosCafe.length);
     console.log("Restaurantes:", dadosRest.length);
-    console.log("Gasolina:", dadosGas.length);
-    console.log("Comboio:", dadosComb.length);
-    console.log("Autocarro:", dadosAuto.length);
+    console.log("Servicos:", servicos.bombas.length);
+
 
     dadosLocal.forEach(loc => {
       todosPontosDisponiveis.push({
@@ -69,7 +88,7 @@ async function carregarDados() {
       });
     });
 
-    dadosCafe.forEach(cafe => {
+    restauracao.cafes.forEach(cafe => {
       todosPontosDisponiveis.push({
         lat: parseFloat(cafe.latitude),
         lng: parseFloat(cafe.longitude),
@@ -79,13 +98,44 @@ async function carregarDados() {
       });
     });
 
-    dadosRest.forEach(resto => {
+    restauracao.restaurantes.forEach(resto => {
       todosPontosDisponiveis.push({
         lat: parseFloat(resto.latitude),
         lng: parseFloat(resto.longitude),
         tipo: "resto",
         nome: resto.nome,
         id: resto.id
+      });
+    });
+
+    // Bombas de gasolina
+    servicos.bombas.forEach(bomba => {
+      todosPontosDisponiveis.push({
+        lat: parseFloat(bomba.latitude),
+        lng: parseFloat(bomba.longitude),
+        tipo: "gas",
+        nome: bomba.nome,
+        id: bomba.id
+      });
+    });
+
+    servicos.comboios.forEach(estacao => {
+      todosPontosDisponiveis.push({
+        lat: parseFloat(estacao.latitude),
+        lng: parseFloat(estacao.longitude),
+        tipo: "comb",
+        nome: estacao.nome,
+        id: estacao.id
+      });
+    });
+
+    servicos.autocarros.forEach(auto => {
+      todosPontosDisponiveis.push({
+        lat: parseFloat(auto.latitude),
+        lng: parseFloat(auto.longitude),
+        tipo: "auto",
+        nome: auto.nome,
+        id: auto.id
       });
     });
 
@@ -102,6 +152,9 @@ function carregarMarcadoresVisiveis(bounds) {
   const arqueoAtivo = document.getElementById("chkArqueo")?.checked;
   const cafeAtivo = document.getElementById("chkCafe")?.checked;
   const restoAtivo = document.getElementById("chkResto")?.checked;
+  const gasAtivo = document.getElementById("chkGas")?.checked;
+  const combAtivo = document.getElementById("chkComb")?.checked;
+  const autoAtivo = document.getElementById("chkAuto")?.checked;
 
   todosPontosDisponiveis.forEach(ponto => {
     const tipo = ponto.tipo;
@@ -110,7 +163,10 @@ function carregarMarcadoresVisiveis(bounds) {
     const estaAtivo =
         (tipo === "arqueo" && arqueoAtivo) ||
         (tipo === "cafe" && cafeAtivo) ||
-        (tipo === "resto" && restoAtivo);
+        (tipo === "resto" && restoAtivo) ||
+        (tipo === "gas" && gasAtivo) ||
+        (tipo === "comb" && combAtivo) ||
+        (tipo === "auto" && autoAtivo);
 
     const dentroDoMapa = bounds.contains(latlng);
 
@@ -138,6 +194,9 @@ function carregarMarcadoresVisiveis(bounds) {
         case "cafe": icone = iconeCafe; break;
         case "resto": icone = iconeResto; break;
         case "arqueo": icone = iconeArqueo; break;
+        case "gas": icone = iconeGas; break;
+        case "comb": icone = iconeComboio; break;
+        case "auto": icone = iconeAutocarro; break;
       }
 
       const marker = L.marker(latlng, { icon: icone }).bindTooltip(ponto.nome);
