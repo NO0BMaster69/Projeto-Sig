@@ -41,14 +41,23 @@ async function carregarDados() {
     const responseLocal = await fetch("get_locais.php");
     const responseCafe = await fetch("get_cafes.php");
     const responseRest = await fetch("get_restaurantes.php");
+    const responseGas = await fetch("get_bombasGasolina.php");
+    const responseComb = await fetch("get_estacoesComboio.php");
+    const responseAuto = await fetch("get_terminaisAutocarro.php");
 
     const dadosLocal = await responseLocal.json();
     const dadosCafe = await responseCafe.json();
     const dadosRest = await responseRest.json();
+    const dadosGas = await responseGas.json();
+    const dadosComb = await responseComb.json();
+    const dadosAuto = await responseAuto.json();
 
     console.log("Locais:", dadosLocal.length);
     console.log("Cafés:", dadosCafe.length);
     console.log("Restaurantes:", dadosRest.length);
+    console.log("Gasolina:", dadosGas.length);
+    console.log("Comboio:", dadosComb.length);
+    console.log("Autocarro:", dadosAuto.length);
 
     dadosLocal.forEach(loc => {
       todosPontosDisponiveis.push({
