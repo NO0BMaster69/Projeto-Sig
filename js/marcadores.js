@@ -60,22 +60,17 @@ let LocaisArqueo = [];
 async function carregarDados() {
   try {
     const responseLocal = await fetch("get_locais.php");
-    const responseCafe = await fetch("get_cafes.php");
-    const responseRest = await fetch("get_restaurantes.php");
     const responseResta = await fetch("get_restauracao.php");
     const responseServicos = await fetch("get_servicos.php");
 
     const dadosLocal = await responseLocal.json();
-    const dadosCafe = await responseCafe.json();
-    const dadosRest = await responseRest.json();
     const servicos = await responseServicos.json();
     const restauracao =  await responseResta.json();
 
 
     console.log("Locais:", dadosLocal.length);
-    console.log("Cafés:", dadosCafe.length);
-    console.log("Restaurantes:", dadosRest.length);
     console.log("Servicos:", servicos.bombas.length);
+    console.log("Restauração", restauracao.cafes.length);
 
 
     dadosLocal.forEach(loc => {
