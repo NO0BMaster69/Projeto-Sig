@@ -30,7 +30,8 @@ function calcularRota(origem, destino) {
         .then(resp => resp.json())
         .then(data => {
             if (!data?.features?.length) {
-                alert("Rota não encontrada.");
+                const toastErro = new bootstrap.Toast(document.getElementById('toastErroRota'));
+                toastErro.show();
                 return;
             }
 
@@ -54,7 +55,8 @@ function calcularRota(origem, destino) {
         })
         .catch(err => {
             console.error("Erro ao calcular rota:", err);
-            alert("Erro ao calcular rota.");
+            const toastErro = new bootstrap.Toast(document.getElementById('toastErroRota'));
+            toastErro.show();
         });
 }
 

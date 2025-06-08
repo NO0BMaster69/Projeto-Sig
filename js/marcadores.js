@@ -51,9 +51,6 @@ const iconeAutocarro = L.icon({
 
 let todosPontosDisponiveis = [];
 const todosMarcadoresRestauração = [];
-let marcadoresProximos = [];
-let currentRestorationCircle = null;
-let currentRestorationMarkers = [];
 let ultimoPontoSelecionado = null;
 let LocaisArqueo = [];
 
