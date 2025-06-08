@@ -1,10 +1,14 @@
 function toggleLayer(tipo) {
-  // Após mudar o estado dos checkboxes, apenas recarregue os marcadores visíveis
-  if (typeof carregarMarcadoresVisiveis === 'function' && typeof mapa !== 'undefined') {
+  if (typeof mapa === 'undefined') return;
+
+  if (raioSelecionado && pontoCentro && typeof filtrarMarcadoresPorRaio === 'function') {
+    // Se o raio estiver ativo, aplica só os pontos dentro do raio com checkbox ativo
+    filtrarMarcadoresPorRaio(raioSelecionado);
+  } else if (typeof carregarMarcadoresVisiveis === 'function') {
+    // Se o raio estiver desativado, carrega pontos com base em checkbox e área visível
     carregarMarcadoresVisiveis(mapa.getBounds());
   }
 }
-
 
 
 const iconeArqueo = L.icon({
@@ -53,6 +57,7 @@ let todosPontosDisponiveis = [];
 const todosMarcadoresRestauração = [];
 let ultimoPontoSelecionado = null;
 let LocaisArqueo = [];
+let currentRestorationMarkers = [];
 
 async function carregarDados() {
   try {
@@ -162,7 +167,6 @@ function carregarMarcadoresVisiveis(bounds) {
 
     const dentroDoMapa = bounds.contains(latlng);
 
-    // Aplicar raio só a café/restaurante
     const dentroDoRaio = (
         tipo === "arqueo" || raioSelecionado === null || pontoCentro === null
             ? true
@@ -171,7 +175,6 @@ function carregarMarcadoresVisiveis(bounds) {
 
     const deveMostrar = estaAtivo && dentroDoMapa && dentroDoRaio;
 
-    //  Remover se não deve mostrar
     if (!deveMostrar && ponto._adicionado && ponto._marker) {
       mapa.removeLayer(ponto._marker);
       ponto._adicionado = false;
@@ -179,7 +182,6 @@ function carregarMarcadoresVisiveis(bounds) {
       return;
     }
 
-    //  Adicionar se deve mostrar e ainda não foi adicionado
     if (deveMostrar && !ponto._adicionado) {
       let icone;
       switch (tipo) {
@@ -201,10 +203,17 @@ function carregarMarcadoresVisiveis(bounds) {
       if (tipo === "arqueo") {
         marker.on("click", () => {
           ultimoPontoSelecionado = ponto;
+
+          mapa.flyTo(latlng, mapa.getZoom(), {
+            animate: true,
+            duration: 1.2
+          });
+
           if (typeof mostrarMenuRaio === "function") {
             mostrarMenuRaio(marker);
           }
         });
+
         LocaisArqueo.push(marker);
       }
 
@@ -213,5 +222,11 @@ function carregarMarcadoresVisiveis(bounds) {
     }
   });
 }
+
+
+
+
+
+
 
 carregarDados();
