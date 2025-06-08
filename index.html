@@ -26,13 +26,15 @@
 </head>
 
 <!-- Toast de erro -->
-<div class="position-fixed top-10 start-50 translate-middle-x p-3" style="z-index: 9999">
-    <div id="toastErroRota" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+<div class="position-fixed top-10 start-50 translate-middle-x p-3" style="z-index: 9999;">
+    <div id="toastErroRota" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
+         aria-atomic="true">
         <div class="d-flex">
             <div class="toast-body">
                 Não foi possível calcular a rota entre os pontos selecionados.
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Fechar"></button>
         </div>
     </div>
 </div>
@@ -55,125 +57,127 @@
            style="cursor:pointer; display: none;"></i>
     </div>
 
-    <!-- Criar Rota e Controle de Mapa -->
-    <div class="d-flex gap-2 align-items-center">
-        <!-- Mudar Base de Mapa -->
-        <div class="btn-group dropup"  data-intro="Aqui podes mudar a base de mapa ou aceder à ajuda." data-title="Controlo do Mapa" >
-            <button type="button" class="btn btn-primary dropdown-toggle map-dropdown" data-bs-toggle="dropdown">
-                <i class="bi bi-map"></i> Mapa
+        <!-- Criar Rota e Controle de Mapa -->
+        <div class="d-flex gap-2 align-items-center">
+            <!-- Mudar Base de Mapa -->
+            <div class="btn-group dropup" data-intro="Aqui podes mudar a base de mapa ou aceder à ajuda."
+                 data-title="Controlo do Mapa">
+                <button type="button" class="btn btn-primary dropdown-toggle map-dropdown" data-bs-toggle="dropdown">
+                    <i class="bi bi-map"></i> Mapa
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick="mudarBase('osm')">OpenStreetMap</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="mudarBase('topo')">Topo</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="mudarBase('satellite')">Satélite</a></li>
+                </ul>
+            </div>
+            <!-- Criar Rota -->
+            <button id="btnCriarRota"
+                    class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                    onclick="iniciarRota()"
+                    data-intro="Clique aqui para iniciar uma rota. Depois selecione dois pontos no mapa."
+                    data-title="Criar Rota">
+                <i class="bi bi-signpost-2"></i>
+                <span>Criar Rota</span>
             </button>
-            <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#" onclick="mudarBase('osm')">OpenStreetMap</a></li>
-                <li><a class="dropdown-item" href="#" onclick="mudarBase('topo')">Topo</a></li>
-                <li><a class="dropdown-item" href="#" onclick="mudarBase('satellite')">Satélite</a></li>
-            </ul>
+            <button id="btnFecharRota"
+                    class="btn btn-outline-danger d-none px-3"
+                    onclick="fecharRota()"
+                    title="Fechar rota ativa"
+                    style="height: 100%;">
+                <i class="bi bi-x-lg fs-5"></i>
+            </button>
         </div>
-        <!-- Criar Rota -->
-        <button id="btnCriarRota"
-                class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
-                onclick="iniciarRota()"
-                data-intro="Clique aqui para iniciar uma rota. Depois selecione dois pontos no mapa."
-                data-title="Criar Rota">
-            <i class="bi bi-signpost-2"></i>
-            <span>Criar Rota</span>
-        </button>
-        <button id="btnFecharRota"
-                class="btn btn-outline-danger d-none px-3"
-                onclick="fecharRota()"
-                title="Fechar rota ativa"
-                style="height: 100%;">
-            <i class="bi bi-x-lg fs-5"></i>
-        </button>
-    </div>
 
-    <!-- Transporte -->
-    <div id="modoTransporte"
-         class="btn-group w-100 mt-2"
-         role="group"
-         aria-label="Modos de transporte"
-         data-intro="Escolha o modo de transporte desejado: a pé, bicicleta ou carro."
-         data-title="Modo de Transporte">
-        <input type="radio" class="btn-check" name="transportMode" id="walking" value="foot-walking"
-               onchange="selectTransportMode('walking')">
-        <label class="btn btn-outline-primary d-flex flex-column align-items-center py-3" for="walking">
-            <i class="bi bi-person fs-4 mb-1"></i>
-            <span class="small fw-medium">A Pé</span>
-        </label>
-        <input type="radio" class="btn-check" name="transportMode" id="cycling" value="cycling-regular"
-               onchange="selectTransportMode('cycling')">
-        <label class="btn btn-outline-primary d-flex flex-column align-items-center py-3" for="cycling">
-            <i class="bi bi-bicycle fs-4 mb-1"></i>
-            <span class="small fw-medium">Bicicleta</span>
-        </label>
-        <input type="radio" class="btn-check" name="transportMode" id="driving" value="driving-car" checked
-               onchange="selectTransportMode('driving')">
-        <label class="btn btn-outline-primary d-flex flex-column align-items-center py-3" for="driving">
-            <i class="bi bi-car-front fs-4 mb-1"></i>
-            <span class="small fw-medium">Carro</span>
-        </label>
-    </div>
-
-    <!-- Info da rota -->
-    <div class="card border-primary border-2 bg-white" id="journeyInfo"
-         data-intro="Resumo da viagem calculada: tempo e distância."
-         data-title="Informações da Rota">
-        <div class="card-header bg-primary text-white py-2">
-            <div class="d-flex align-items-center">
-                <i class="bi bi-clock me-2"></i>
-                <small class="fw-semibold">Viagem Estimada</small>
-            </div>
+        <!-- Transporte -->
+        <div id="modoTransporte"
+             class="btn-group w-100 mt-2"
+             role="group"
+             aria-label="Modos de transporte"
+             data-intro="Escolha o modo de transporte desejado: a pé, bicicleta ou carro."
+             data-title="Modo de Transporte">
+            <input type="radio" class="btn-check" name="transportMode" id="walking" value="foot-walking"
+                   onchange="selectTransportMode('walking')">
+            <label class="btn btn-outline-primary d-flex flex-column align-items-center py-3" for="walking">
+                <i class="bi bi-person fs-4 mb-1"></i>
+                <span class="small fw-medium">A Pé</span>
+            </label>
+            <input type="radio" class="btn-check" name="transportMode" id="cycling" value="cycling-regular"
+                   onchange="selectTransportMode('cycling')">
+            <label class="btn btn-outline-primary d-flex flex-column align-items-center py-3" for="cycling">
+                <i class="bi bi-bicycle fs-4 mb-1"></i>
+                <span class="small fw-medium">Bicicleta</span>
+            </label>
+            <input type="radio" class="btn-check" name="transportMode" id="driving" value="driving-car" checked
+                   onchange="selectTransportMode('driving')">
+            <label class="btn btn-outline-primary d-flex flex-column align-items-center py-3" for="driving">
+                <i class="bi bi-car-front fs-4 mb-1"></i>
+                <span class="small fw-medium">Carro</span>
+            </label>
         </div>
-        <div class="card-body p-3">
-            <div class="row g-3">
-                <div class="col-6 text-center">
-                    <div class="d-flex justify-content-center align-items-center mb-2">
-                        <i class="bi bi-stopwatch text-primary fs-5"></i>
-                    </div>
-                    <div class="fw-bold text-dark fs-6" id="travelTime">--</div>
-                    <small class="text-muted">Tempo</small>
+
+        <!-- Info da rota -->
+        <div class="card border-primary border-2 bg-white" id="journeyInfo"
+             data-intro="Resumo da viagem calculada: tempo e distância."
+             data-title="Informações da Rota">
+            <div class="card-header bg-primary text-white py-2">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-clock me-2"></i>
+                    <small class="fw-semibold">Viagem Estimada</small>
                 </div>
-                <div class="col-6 text-center">
-                    <div class="d-flex justify-content-center align-items-center mb-2">
-                        <i class="bi bi-signpost text-primary fs-5"></i>
+            </div>
+            <div class="card-body p-3">
+                <div class="row g-3">
+                    <div class="col-6 text-center">
+                        <div class="d-flex justify-content-center align-items-center mb-2">
+                            <i class="bi bi-stopwatch text-primary fs-5"></i>
+                        </div>
+                        <div class="fw-bold text-dark fs-6" id="travelTime">--</div>
+                        <small class="text-muted">Tempo</small>
                     </div>
-                    <div class="fw-bold text-dark fs-6" id="travelDistance">--</div>
-                    <small class="text-muted">Distância</small>
+                    <div class="col-6 text-center">
+                        <div class="d-flex justify-content-center align-items-center mb-2">
+                            <i class="bi bi-signpost text-primary fs-5"></i>
+                        </div>
+                        <div class="fw-bold text-dark fs-6" id="travelDistance">--</div>
+                        <small class="text-muted">Distância</small>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Filtros -->
-    <div class="bg-white p-3 rounded shadow mt-3"
-         data-intro="Ative ou desative diferentes categorias no mapa."
-         data-title="Camadas Temáticas">
-        <h6 class="fw-bold mb-2">Camadas Temáticas</h6>
-        <div class="form-check">
-            <input hidden="hidden" class="form-check-input" type="checkbox" id="chkArqueo" onchange="toggleLayer('arqueo')" checked>
-            <label class="form-check-label" for="chkArqueo">Locais Arqueológicos</label>
-        </div>
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="chkCafe" onchange="toggleLayer('cafe')">
-            <label class="form-check-label" for="chkCafe">Cafés</label>
-        </div>
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="chkResto" onchange="toggleLayer('resto')">
-            <label class="form-check-label" for="chkResto">Restaurantes</label>
-        </div>
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="chkGas" onchange="toggleLayer('gas')">
-            <label class="form-check-label" for="chkGas">Bombas de Gasolina</label>
-        </div>
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="chkComb" onchange="toggleLayer('comb')">
-            <label class="form-check-label" for="chkComb">Estações de Comboio</label>
-        </div>
+        <!-- Filtros -->
+        <div class="bg-white p-3 rounded shadow mt-3"
+             data-intro="Ative ou desative diferentes categorias no mapa."
+             data-title="Camadas Temáticas">
+            <h6 class="fw-bold mb-2">Camadas Temáticas</h6>
+            <div class="form-check">
+                <input hidden="hidden" class="form-check-input" type="checkbox" id="chkArqueo"
+                       onchange="toggleLayer('arqueo')" checked>
+                <label class="form-check-label" for="chkArqueo">Locais Arqueológicos</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="chkCafe" onchange="toggleLayer('cafe')">
+                <label class="form-check-label" for="chkCafe">Cafés</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="chkResto" onchange="toggleLayer('resto')">
+                <label class="form-check-label" for="chkResto">Restaurantes</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="chkGas" onchange="toggleLayer('gas')">
+                <label class="form-check-label" for="chkGas">Bombas de Gasolina</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="chkComb" onchange="toggleLayer('comb')">
+                <label class="form-check-label" for="chkComb">Estações de Comboio</label>
+            </div>
 
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="chkAuto" onchange="toggleLayer('auto')">
-            <label class="form-check-label" for="chkAuto">Terminais Rodoviários</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="chkAuto" onchange="toggleLayer('auto')">
+                <label class="form-check-label" for="chkAuto">Terminais Rodoviários</label>
+            </div>
         </div>
-    </div>
 
     <!-- Filtro por raio -->
     <div id="menuRaioArqueo" class="bg-white p-3 rounded shadow mt-3 d-none"
@@ -263,12 +267,13 @@
             if (nextBtn) nextBtn.remove();
 
 
-
         });
 
         intro.start();
     });
 </script>
+
+
 
 </body>
 </html>
