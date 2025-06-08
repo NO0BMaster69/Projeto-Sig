@@ -71,3 +71,16 @@ body, html{
     font-size: 1.5rem;
     margin: 0;
 }
+
+#menuLateral {
+    width: 260px;
+    transition: transform 0.3s ease-in-out;
+}
+
+#menuLateralContainer.collapsed #menuLateral {
+    transform: translateX(-100%);
+}
+
+#menuLateralContainer.collapsed #toggleIcon {
+    transform: rotate(180deg);
+}

@@ -273,6 +273,17 @@
     });
 </script>
 
+<script>
+    const toggleBtn = document.getElementById('toggleMenuBtn');
+    const menuContainer = document.getElementById('menuLateralContainer');
+    const icon = document.getElementById('toggleIcon');
+
+    toggleBtn.addEventListener('click', () => {
+        menuContainer.classList.toggle('collapsed');
+        icon.classList.toggle('bi-chevron-left');
+        icon.classList.toggle('bi-chevron-right');
+    });
+</script>
 
 
 </body>
