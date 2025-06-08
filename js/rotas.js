@@ -117,5 +117,16 @@ document.getElementById('modoTransporte').addEventListener('change', function ()
 });
 
 // Expõe funções globalmente
+/**
+ * Expõe a função iniciarRota globalmente, permitindo que seja chamada a partir do escopo global (ex: HTML inline ou outros scripts).
+ * @global
+ * @function iniciarRota
+ */
 window.iniciarRota = iniciarRota;
+
+/**
+ * Expõe a função fecharRota globalmente, permitindo que seja chamada a partir do escopo global (ex: HTML inline ou outros scripts).
+ * @global
+ * @function fecharRota
+ */
 window.fecharRota = fecharRota;

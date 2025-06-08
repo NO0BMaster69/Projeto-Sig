@@ -1,4 +1,20 @@
-// mapa.js (atualizado para suportar carregamento progressivo de pontos)
+/**
+ * mapa.js
+ *
+ * Este ficheiro gere a inicialização do mapa Leaflet, a troca de camadas base,
+ * a seleção e filtragem de pontos arqueológicos e de restauração/serviços por raio,
+ * bem como a exibição dinâmica de marcadores conforme a área visível e filtros ativos.
+ *
+ * Funções principais:
+ * - Inicialização do mapa e camadas base (OSM, Topo, Satélite)
+ * - Troca de camada base
+ * - Seleção de ponto arqueológico e aplicação de filtro por raio
+ * - Carregamento e filtragem de marcadores visíveis
+ * - Exibição de marcadores de acordo com filtros e área do mapa
+ *
+ * @author Grupo 3 PTAS 2025
+ * @version 1.0
+ */
 
 // Inicialização do mapa centrado em Aveiro
 window.mapa = L.map('map', {
@@ -12,17 +28,18 @@ const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(mapa);
 
-
-
 let timeoutCarregamento = null;
 
+/**
+ * Evento disparado ao terminar o movimento do mapa (pan/zoom).
+ * Atualiza os marcadores visíveis conforme a área do mapa.
+ */
 mapa.on('moveend', () => {
     if (typeof carregarMarcadoresVisiveis === "function") {
         carregarMarcadoresVisiveis(mapa.getBounds());
     }
 });
 // Chamar também ao iniciar o mapa
-
 
 // Camadas alternativas
 const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
@@ -33,12 +50,21 @@ const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/servic
     attribution: '&copy; Esri & contributors'
 });
 
+/**
+ * Objeto com as camadas base disponíveis.
+ */
 const bases = {
     'osm': osmLayer,
     'topo': topoLayer,
     'satellite': satLayer
 };
 
+/**
+ * Troca a camada base do mapa conforme o tipo selecionado.
+ * Remove a camada anterior e adiciona a nova.
+ *
+ * @param {string} tipo - Tipo da camada base ('osm', 'topo', 'satellite')
+ */
 function mudarBase(tipo) {
     mapa.eachLayer(layer => {
         if (layer instanceof L.TileLayer) {
@@ -48,11 +74,16 @@ function mudarBase(tipo) {
     bases[tipo].addTo(mapa);
 }
 
-let raioSelecionado = null;
-let circuloRaio = null;
-let pontoCentro = null;
+let raioSelecionado = null;   // Raio selecionado para filtro (em metros)
+let circuloRaio = null;       // Objeto círculo desenhado no mapa
+let pontoCentro = null;       // Centro do raio (LatLng)
 
-// Mostrar o menu ao clicar num ponto arqueológico
+/**
+ * Mostra o menu de seleção de raio ao clicar num marcador arqueológico.
+ * Atualiza ou move o círculo de raio no mapa e aplica o filtro.
+ *
+ * @param {L.Marker} marker - Marcador arqueológico selecionado
+ */
 function mostrarMenuRaio(marker) {
     const menu = document.getElementById("menuRaioArqueo");
     if (menu) {
@@ -77,6 +108,10 @@ function mostrarMenuRaio(marker) {
     filtrarMarcadoresPorRaio(raioSelecionado);
 }
 
+/**
+ * Aplica o filtro de raio selecionado para mostrar apenas marcadores dentro do raio.
+ * Remove o círculo e filtros se o utilizador cancelar.
+ */
 function aplicarFiltroRaioArqueo() {
     const valor = document.getElementById("selectRaio").value;
 
@@ -113,7 +148,7 @@ function aplicarFiltroRaioArqueo() {
             fillOpacity: 0.1
         }).addTo(mapa);
 
-        // ✅ Aplica imediatamente o filtro por raio
+        // Aplica imediatamente o filtro por raio
         if (typeof filtrarMarcadoresPorRaio === "function") {
             filtrarMarcadoresPorRaio(raioSelecionado);
         }
@@ -128,6 +163,10 @@ function aplicarFiltroRaioArqueo() {
     }
 }
 
+/**
+ * Mostra todos os marcadores arqueológicos no mapa.
+ * Adiciona eventos de clique para seleção e filtro por raio.
+ */
 function mostrarArqueologicos() {
     todosPontosDisponiveis.forEach(ponto => {
         if (ponto.tipo === "arqueo" && !ponto._adicionado) {
@@ -150,8 +189,12 @@ function mostrarArqueologicos() {
     });
 }
 
-
-// Função para remover marcadores filtrados do raio anterior
+/**
+ * Filtra e mostra apenas os marcadores de restauração/serviços dentro do raio selecionado.
+ * Remove marcadores fora do raio e redesenha os que cumprem o critério.
+ *
+ * @param {number} raio - Raio em metros para filtrar marcadores
+ */
 function filtrarMarcadoresPorRaio(raio) {
     currentRestorationMarkers.forEach(m => mapa.removeLayer(m));
     currentRestorationMarkers = [];
@@ -177,7 +220,7 @@ function filtrarMarcadoresPorRaio(raio) {
 
         const dentro = pontoCentro.distanceTo(latlng) <= raio;
 
-        // 🔁 Apaga qualquer marcador existente antes de redesenhar
+        //Apaga qualquer marcador existente antes de redesenhar
         if (ponto._marker) {
             mapa.removeLayer(ponto._marker);
             ponto._marker = null;
@@ -207,9 +250,5 @@ function filtrarMarcadoresPorRaio(raio) {
     carregarMarcadoresVisiveis(mapa.getBounds());
 }
 
-
-
-
-
-
+// Define a posição do controlo de zoom no canto inferior direito
 mapa.zoomControl.setPosition('bottomright');

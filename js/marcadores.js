@@ -1,3 +1,21 @@
+/**
+ * js/marcadores.js
+ *
+ * Este ficheiro gere a lógica de carregamento, filtragem e visualização de marcadores
+ * (arqueológicos, restauração, serviços) num mapa Leaflet, com suporte a filtros por tipo,
+ * área visível e raio de seleção.
+ *
+ * @author Grupo 3 PTAS 2025
+ * @version 1.0
+ */
+
+/**
+ * Alterna a camada de marcadores no mapa consoante o tipo e o estado dos filtros.
+ * Se um raio estiver selecionado, filtra os marcadores por raio; caso contrário,
+ * carrega os marcadores visíveis na área do mapa.
+ *
+ * @param {string} tipo - Tipo de marcador a alternar.
+ */
 function toggleLayer(tipo) {
   if (typeof mapa === 'undefined') return;
 
@@ -10,7 +28,7 @@ function toggleLayer(tipo) {
   }
 }
 
-
+// Definição dos ícones personalizados para cada tipo de marcador
 const iconeArqueo = L.icon({
   iconUrl: 'https://cdn-icons-png.flaticon.com/512/1597/1597883.png',
   iconSize: [32, 32],
@@ -53,12 +71,21 @@ const iconeAutocarro = L.icon({
   popupAnchor: [0, -28]
 });
 
+// Arrays globais para gestão dos pontos e marcadores
 let todosPontosDisponiveis = [];
 const todosMarcadoresRestauração = [];
 let ultimoPontoSelecionado = null;
 let LocaisArqueo = [];
 let currentRestorationMarkers = [];
 
+/**
+ * Carrega dados de locais arqueológicos, restauração e serviços via AJAX,
+ * processa-os e armazena-os em `todosPontosDisponiveis`.
+ * Após o carregamento, chama a função para mostrar os marcadores visíveis.
+ *
+ * @async
+ * @returns {Promise<void>}
+ */
 async function carregarDados() {
   try {
     const responseLocal = await fetch("get_locais.php");
@@ -69,12 +96,11 @@ async function carregarDados() {
     const servicos = await responseServicos.json();
     const restauracao =  await responseResta.json();
 
-
     console.log("Locais:", dadosLocal.length);
     console.log("Servicos:", servicos.bombas.length);
     console.log("Restauração", restauracao.cafes.length);
 
-
+    // Processa locais arqueológicos
     dadosLocal.forEach(loc => {
       let nomeFinal = "Nome desconhecido";
 
@@ -93,7 +119,7 @@ async function carregarDados() {
       });
     });
 
-
+    // Processa cafés
     restauracao.cafes.forEach(cafe => {
       todosPontosDisponiveis.push({
         lat: parseFloat(cafe.latitude),
@@ -104,6 +130,7 @@ async function carregarDados() {
       });
     });
 
+    // Processa restaurantes
     restauracao.restaurantes.forEach(resto => {
       todosPontosDisponiveis.push({
         lat: parseFloat(resto.latitude),
@@ -114,7 +141,7 @@ async function carregarDados() {
       });
     });
 
-    // Bombas de gasolina
+    // Processa bombas de gasolina
     servicos.bombas.forEach(bomba => {
       todosPontosDisponiveis.push({
         lat: parseFloat(bomba.latitude),
@@ -125,6 +152,7 @@ async function carregarDados() {
       });
     });
 
+    // Processa estações de comboio
     servicos.comboios.forEach(estacao => {
       todosPontosDisponiveis.push({
         lat: parseFloat(estacao.latitude),
@@ -135,6 +163,7 @@ async function carregarDados() {
       });
     });
 
+    // Processa estações de autocarro
     servicos.autocarros.forEach(auto => {
       todosPontosDisponiveis.push({
         lat: parseFloat(auto.latitude),
@@ -145,6 +174,7 @@ async function carregarDados() {
       });
     });
 
+    // Carrega marcadores visíveis após o carregamento dos dados
     if (typeof mapa !== 'undefined') {
       carregarMarcadoresVisiveis(mapa.getBounds());
     }
@@ -154,6 +184,13 @@ async function carregarDados() {
   }
 }
 
+/**
+ * Carrega e mostra os marcadores no mapa de acordo com os filtros ativos (checkboxes),
+ * área visível do mapa e, se aplicável, raio de seleção.
+ * Remove marcadores que deixaram de cumprir os critérios.
+ *
+ * @param {L.LatLngBounds} bounds - Limites atuais do mapa.
+ */
 function carregarMarcadoresVisiveis(bounds) {
   const arqueoAtivo = document.getElementById("chkArqueo")?.checked;
   const cafeAtivo = document.getElementById("chkCafe")?.checked;
@@ -184,6 +221,7 @@ function carregarMarcadoresVisiveis(bounds) {
 
     const deveMostrar = estaAtivo && dentroDoMapa && dentroDoRaio;
 
+    // Remove marcador se não deve ser mostrado
     if (!deveMostrar && ponto._adicionado && ponto._marker) {
       mapa.removeLayer(ponto._marker);
       ponto._adicionado = false;
@@ -191,6 +229,7 @@ function carregarMarcadoresVisiveis(bounds) {
       return;
     }
 
+    // Adiciona marcador se deve ser mostrado e ainda não está no mapa
     if (deveMostrar && !ponto._adicionado) {
       let icone;
       switch (tipo) {
@@ -205,10 +244,12 @@ function carregarMarcadoresVisiveis(bounds) {
       const marker = L.marker(latlng, { icon: icone }).bindTooltip(ponto.nome);
       marker.addTo(mapa);
 
+      // Guarda referência para cafés/restaurantes
       if (tipo === "cafe" || tipo === "resto") {
         todosMarcadoresRestauração.push({ marker, tipo });
       }
 
+      // Eventos e gestão para locais arqueológicos
       if (tipo === "arqueo") {
         marker.on("click", () => {
           ultimoPontoSelecionado = ponto;
@@ -232,10 +273,5 @@ function carregarMarcadoresVisiveis(bounds) {
   });
 }
 
-
-
-
-
-
-
+// Inicia o carregamento dos dados ao carregar o ficheiro
 carregarDados();
