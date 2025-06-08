@@ -76,14 +76,23 @@ async function carregarDados() {
 
 
     dadosLocal.forEach(loc => {
+      let nomeFinal = "Nome desconhecido";
+
+      if (loc.nome && loc.nome.trim() !== "") {
+        nomeFinal = loc.nome;
+      } else if (loc.alt_name && loc.alt_name.trim() !== "") {
+        nomeFinal = loc.alt_name;
+      }
+
       todosPontosDisponiveis.push({
         lat: parseFloat(loc.latitude),
         lng: parseFloat(loc.longitude),
         tipo: "arqueo",
-        nome: loc.nome,
+        nome: nomeFinal,
         id: loc.id
       });
     });
+
 
     restauracao.cafes.forEach(cafe => {
       todosPontosDisponiveis.push({
