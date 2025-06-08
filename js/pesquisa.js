@@ -1,7 +1,6 @@
 // Função para pesquisar endereço usando a API Nominatim (OpenStreetMap)
 async function pesquisarEndereco(query) {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5`;
-    const resp = await fetch(url, {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&countrycodes=pt&bounded=1&viewbox=-9.5,42.2,-6.2,36.8`;    const resp = await fetch(url, {
         headers: {
             "Accept-Language": "pt"
         }
