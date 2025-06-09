@@ -162,7 +162,21 @@ function aplicarFiltroRaioArqueo() {
         alert("Seleciona primeiro um ponto arqueológico no mapa para aplicar o raio.");
     }
 }
+function cancelarFiltroRaio() {
+    if (circuloRaio) {
+        mapa.removeLayer(circuloRaio);
+        circuloRaio = null;
+    }
 
+    raioSelecionado = null;
+    pontoCentro = null;
+
+    document.getElementById("menuRaioArqueo").classList.add("d-none");
+
+    if (typeof carregarMarcadoresVisiveis === "function") {
+        carregarMarcadoresVisiveis(mapa.getBounds());
+    }
+}
 /**
  * Mostra todos os marcadores arqueológicos no mapa.
  * Adiciona eventos de clique para seleção e filtro por raio.

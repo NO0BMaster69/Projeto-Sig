@@ -77,6 +77,7 @@ const todosMarcadoresRestauração = [];
 let ultimoPontoSelecionado = null;
 let LocaisArqueo = [];
 let currentRestorationMarkers = [];
+let ultimoValorSlider = 15000;
 
 /**
  * Carrega dados de locais arqueológicos, restauração e serviços via AJAX,
@@ -181,6 +182,53 @@ async function carregarDados() {
 
   } catch (erro) {
     console.error("Erro ao carregar dados:", erro);
+  }
+}
+
+function atualizarSliderRaio(valor) {
+  const km = valor / 1000;
+  document.getElementById("valorRaioLabel").innerText = `${km} km`;
+
+  valor = parseInt(valor);
+  raioSelecionado = valor;
+
+  // Atualizar ou criar o círculo
+  if (circuloRaio) {
+    circuloRaio.setRadius(valor);
+  } else if (pontoCentro) {
+    circuloRaio = L.circle(pontoCentro, {
+      radius: valor,
+      color: "#007BFF",
+      fillColor: "#007BFF",
+      fillOpacity: 0.1
+    }).addTo(mapa);
+  }
+
+  // ➕ Animação de zoom com base na direção
+  if (pontoCentro) {
+    const zoomAtual = mapa.getZoom();
+    let novoZoom = zoomAtual;
+
+    if (valor > ultimoValorSlider) {
+      novoZoom = zoomAtual - 1; // zoom out
+    } else if (valor < ultimoValorSlider) {
+      novoZoom = zoomAtual + 1; // zoom in
+    }
+
+    // Limita o zoom entre 5 e 18, por exemplo
+    novoZoom = Math.max(5, Math.min(18, novoZoom));
+
+    mapa.flyTo(pontoCentro, novoZoom, {
+      animate: true,
+      duration: 1
+    });
+  }
+
+  ultimoValorSlider = valor;
+
+  // Atualizar pontos
+  if (typeof filtrarMarcadoresPorRaio === "function") {
+    filtrarMarcadoresPorRaio(raioSelecionado);
   }
 }
 

@@ -236,13 +236,11 @@
     <div id="menuRaioArqueo" class="bg-white p-3 rounded shadow mt-3 d-none"
          data-intro="Filtra os pontos de restauração num raio definido."
          data-title="Filtro por Raio">
-        <label for="selectRaio" class="form-label fw-bold mb-1">Filtrar restauração num raio de:</label>
-        <select id="selectRaio" class="form-select form-select-sm" onchange="aplicarFiltroRaioArqueo()">
-            <option value="">Cancelar</option>
-            <option value="5000">5 km</option>
-            <option value="15000">15 km</option>
-            <option value="25000">25 km</option>
-        </select>
+        <label for="sliderRaio" class="form-label fw-bold mb-1">Filtrar camadas num raio de:</label>
+        <input type="range" class="form-range" id="sliderRaio" min="5000" max="50000" step="1000" value="15000"
+               oninput="atualizarSliderRaio(this.value)">
+        <div class="text-center mt-2"><span id="valorRaioLabel">15 km</span></div>
+        <button class="btn btn-sm btn-outline-danger mt-2" onclick="cancelarFiltroRaio()">Cancelar Filtro</button>
     </div>
 </div>
 
