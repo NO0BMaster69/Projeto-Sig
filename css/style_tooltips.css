@@ -110,18 +110,18 @@
     opacity: 1;
 }
 
-#journeyInfo {
-    border-bottom-left-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-    border: #0d6efd 1px solid;
-}
+
 
 #transportOptionsGroup {
-    border-top-left-radius: 0 !important;
-    border-top-right-radius: 0 !important;
-    margin-top: 0 !important;
-    border: #0d6efd 1px solid;
+    margin-top: -1px; /* sobrepõe o separador border-top */
+    border-top: 1px solid #dee2e6;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+    width: 100%;
 }
+
 
 
 
