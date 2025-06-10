@@ -67,11 +67,6 @@
 
 <body>
 <!--
-    Div principal do mapa Leaflet.
--->
-<div id="map"></div>
-
-<!--
     Barra lateral com ferramentas e filtros.
 -->
 <div class="sidebar-toolbar flex-column align-items-stretch gap-3">
@@ -92,13 +87,13 @@
     <!--
         Controlo de mapa (troca de base) e criação de rotas.
     -->
-    <div class="d-flex gap-2 align-items-center">
+    <div class="d-flex align-items-center">
         <!--
             Dropdown para mudar a base do mapa.
         -->
         <div class="btn-group" data-intro="Aqui podes mudar a base de mapa ou aceder à ajuda."
              data-title="Controlo do Mapa">
-            <button type="button" class="btn btn-primary dropdown-toggle map-dropdown" data-bs-toggle="dropdown">
+            <button type="button" class="btn btn-primary dropdown-toggle map-dropdown me-2" data-bs-toggle="dropdown">
                 <i class=></i> Mapa
             </button>
             <ul class="dropdown-menu">
@@ -125,7 +120,7 @@
 
         <div class="btn-group">
         <button id="btnFecharRota"
-                class="btn btn-outline-danger d-none px-3"
+                class="btn btn-outline-danger d-none px-3 ms-2"
                 onclick="fecharRota()"
                 title="Fechar rota ativa"
                 style="">
@@ -171,24 +166,21 @@
                      data-intro="Escolha o modo de transporte desejado: a pé, bicicleta ou carro."
                      data-title="Modo de Transporte">
 
-                    <input type="radio" class="btn-check" name="transportMode" id="walking" value="foot-walking"
-                           onchange="selectTransportMode('walking')">
+                    <input type="radio" class="btn-check" name="transportMode" id="walking" value="foot-walking">
                     <label class="btn btn-outline-primary d-flex flex-column align-items-center py-1 position-relative group-tooltip"
                            for="walking">
                         <i class="bi bi-person fs-4 mb-1"></i>
                         <span class="custom-tooltip">A Pé</span>
                     </label>
 
-                    <input type="radio" class="btn-check" name="transportMode" id="cycling" value="cycling-regular"
-                           onchange="selectTransportMode('cycling')">
+                    <input type="radio" class="btn-check" name="transportMode" id="cycling" value="cycling-regular">
                     <label class="btn btn-outline-primary d-flex flex-column align-items-center py-1 position-relative group-tooltip"
                            for="cycling">
                         <i class="bi bi-bicycle fs-4 mb-1"></i>
                         <span class="custom-tooltip">Bicicleta</span>
                     </label>
 
-                    <input type="radio" class="btn-check" name="transportMode" id="driving" value="driving-car" checked
-                           onchange="selectTransportMode('driving')">
+                    <input type="radio" class="btn-check" name="transportMode" id="driving" value="driving-car" checked>
                     <label class="btn btn-outline-primary d-flex flex-column align-items-center py-1 position-relative group-tooltip"
                            for="driving">
                         <i class="bi bi-car-front fs-4 mb-1"></i>
@@ -258,6 +250,11 @@
         <i class="bi bi-question-circle-fill"></i>
     </button>
 </div>
+
+<!--
+    Div principal do mapa Leaflet.
+-->
+<div id="map"></div>
 
 <!--
     Inclusão de scripts externos e scripts da aplicação.
