@@ -89,4 +89,44 @@
     transform: rotate(0deg); /* Ao abrir, aponta para cima */
 }
 
+.group-tooltip {
+    position: relative;
+}
+
+.custom-tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 120%;
+    background-color: #333;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    transition: opacity 0.2s ease-in-out;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.group-tooltip:hover .custom-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+#journeyInfo {
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border: #0d6efd 1px solid;
+}
+
+#transportOptionsGroup {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    margin-top: 0 !important;
+    border: #0d6efd 1px solid;
+}
+
+
+
 
